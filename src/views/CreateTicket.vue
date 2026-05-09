@@ -13,10 +13,8 @@
       <div class="form-group">
         <label class="form-label">内容</label>
         <div class="upload-area">
-          <label class="upload-btn">
-            📎 上传图片
-            <input type="file" accept="image/*" hidden @change="uploadImage" />
-          </label>
+          <button class="upload-btn" type="button" @click="triggerUpload">📎 上传图片</button>
+          <input ref="fileInputRef" type="file" accept="image/*" hidden @change="uploadImage" />
         </div>
         <textarea v-model="body" rows="8" placeholder="请输入工单内容（支持 Markdown 格式）" class="form-textarea" @input="autoResize"></textarea>
         <div v-if="uploading" class="uploading">上传中...</div>
@@ -61,6 +59,11 @@ async function submit() {
   } else {
     error.value = e || '提交失败'
   }
+}
+
+const fileInputRef = ref<HTMLInputElement | null>(null)
+function triggerUpload() {
+  fileInputRef.value?.click()
 }
 
 async function uploadImage(e: Event) {

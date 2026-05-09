@@ -36,10 +36,8 @@
       <div v-if="ticket.state === 'open'" class="reply-section">
         <h3>添加评论</h3>
         <div class="upload-area">
-          <label class="upload-btn">
-            📎 上传图片
-            <input type="file" accept="image/*" hidden @change="uploadImage" />
-          </label>
+          <button class="upload-btn" type="button" @click="triggerUpload">📎 上传图片</button>
+          <input ref="fileInputRef" type="file" accept="image/*" hidden @change="uploadImage" />
         </div>
         <textarea v-model="commentText" rows="4" placeholder="输入评论内容..." class="comment-input"></textarea>
         <div v-if="uploading" class="uploading">上传中...</div>
@@ -100,6 +98,11 @@ async function sendComment() {
     commentText.value = ''
     await fetchDetail()
   }
+}
+
+const fileInputRef = ref<HTMLInputElement | null>(null)
+function triggerUpload() {
+  fileInputRef.value?.click()
 }
 
 async function uploadImage(e: Event) {
