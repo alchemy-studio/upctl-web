@@ -33,7 +33,7 @@
         </div>
       </div>
 
-      <div v-if="ticket.state === 'open'" class="reply-section">
+      <div v-if="ticket.state === 'open' && !isLocked" class="reply-section">
         <h3>添加评论</h3>
         <div class="upload-area">
           <button class="upload-btn" type="button" @click="triggerUpload">📎 上传图片</button>
@@ -46,6 +46,9 @@
             {{ sending ? '发送中...' : '发送' }}
           </button>
         </div>
+      </div>
+      <div v-if="ticket.state === 'open' && isLocked" class="reply-section" style="text-align:center;color:#999;padding:20px">
+        该工单已锁定，无法添加评论
       </div>
     </template>
   </div>
@@ -70,6 +73,10 @@ const sending = ref(false)
 const uploading = ref(false)
 
 const renderedBody = computed(() => renderMarkdown(ticket.value?.body || ''))
+const isLocked = computed(() => {
+  const labels = ticket.value?.labels || []
+  return labels.some((l: any) => ['approved', 'in_progress'].includes(l.name))
+})
 const ticketNumber = Number(route.params.number)
 
 async function fetchDetail() {
