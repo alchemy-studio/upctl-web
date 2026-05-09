@@ -2,23 +2,12 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
-const Environments: Record<string, any> = {
-  local: {
-    main: 'http://admin.localhost:8088',
-    ts: 'http://ts.localhost:8088',
-    host: 'ticket.localhost:8088',
-    wx_app: '',
-  },
-  moicen: {
-    main: 'https://admin.moicen.com',
-    ts: 'https://ts.moicen.com',
-    host: 'ticket.moicen.com',
-    wx_app: 'wx4c6a0a85d5fc6107',
-  },
+const config = {
+  main: process.env.VITE_UC_SERVER !== undefined ? process.env.VITE_UC_SERVER : 'http://admin.localhost:8088',
+  ts: process.env.VITE_TS_SERVER !== undefined ? process.env.VITE_TS_SERVER : 'http://ts.localhost:8088',
+  host: process.env.VITE_HOST || 'ticket.localhost:8088',
+  wx_app: process.env.VITE_WX_APP || '',
 }
-
-const mode = (process.env.mode || 'local') as keyof typeof Environments
-const config = Environments[mode]
 
 export default defineConfig({
   plugins: [vue()],

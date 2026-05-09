@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "vite --host",
-    "dev:moicen": "mode=moicen vite --host",
-    "build:moicen": "mode=moicen vite build",
+    "dev:moicen": "vite --host",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
