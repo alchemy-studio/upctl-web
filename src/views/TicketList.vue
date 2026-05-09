@@ -2,7 +2,10 @@
   <div class="ticket-list-page">
     <header class="page-header">
       <h1>工单列表</h1>
-      <button class="btn btn-text" @click="logout">退出</button>
+      <div class="header-actions">
+        <button class="btn btn-text" @click="goCreate">新建工单</button>
+        <button class="btn btn-text" @click="logout">退出</button>
+      </div>
     </header>
 
     <div class="tab-bar">
@@ -63,6 +66,10 @@ function goDetail(number: number) {
   router.push(`/tickets/${number}`)
 }
 
+function goCreate() {
+  router.push('/tickets/new')
+}
+
 function formatTime(t: string) {
   return t ? dayjs(t).format('MM-DD HH:mm') : ''
 }
@@ -75,6 +82,7 @@ onMounted(() => { fetchTickets() })
 .ticket-list-page { max-width: 800px; margin: 0 auto; padding: 0 16px; }
 .page-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; }
 .page-header h1 { font-size: 20px; }
+.header-actions { display: flex; gap: 8px; align-items: center; }
 .btn-text { background: none; border: none; color: #1a73e8; cursor: pointer; font-size: 14px; }
 .tab-bar { display: flex; gap: 8px; margin-bottom: 12px; }
 .tab { padding: 8px 20px; border: 1px solid #ddd; border-radius: 20px; background: white; cursor: pointer; font-size: 14px; }
