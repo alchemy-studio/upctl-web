@@ -77,7 +77,7 @@ const ticketNumber = Number(route.params.number)
 async function fetchDetail() {
   loading.value = true
   const { r, d, e } = await request({
-    url: `/api/v2/ts/tickets/${ticketNumber}`,
+    url: `/api/v2/upctl/api/tickets/${ticketNumber}`,
   })
   loading.value = false
   if (r && d) {
@@ -91,7 +91,7 @@ async function sendComment() {
   if (!commentText.value.trim() || sending.value) return
   sending.value = true
   const { r, e } = await request({
-    url: `/api/v2/ts/tickets/${ticketNumber}/comments`,
+    url: `/api/v2/upctl/api/tickets/${ticketNumber}/comments`,
     method: 'POST',
     data: { body: commentText.value },
   })
@@ -107,7 +107,7 @@ async function uploadImage(e: Event) {
   if (!file) return
   uploading.value = true
   const { r, d, e: err } = await request({
-    url: '/api/v2/ts/upload_attachment',
+    url: '/api/v2/upctl/api/upload_attachment',
     method: 'POST',
     data: file,
     headers: { 'Content-Type': file.type },

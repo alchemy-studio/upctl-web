@@ -50,7 +50,7 @@ const stateFilter = ref('open')
 async function fetchTickets() {
   loading.value = true
   const { r, d, e } = await request({
-    url: '/api/v2/ts/tickets',
+    url: '/api/v2/upctl/api/tickets',
     params: { state: stateFilter.value, page: 1, page_size: 50 },
   })
   loading.value = false

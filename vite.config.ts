@@ -38,6 +38,7 @@ export default defineConfig({
     proxy: {
       '/api/v1/uc': { changeOrigin: true, target: config.main },
       '/api/v2/ts': { changeOrigin: true, target: config.ts },
+      '/api/v2/upctl/api': { changeOrigin: true, target: config.main },
     },
   },
 })

@@ -20,7 +20,7 @@ axiosInstance.interceptors.request.use((options) => {
   let url = options.url || ''
   if (url.startsWith('/api/v1/uc')) {
     url = UC_SERVER + url
-  } else if (url.startsWith('/api/v2/ts')) {
+  } else if (url.startsWith('/api/v2/')) {
     url = TS_SERVER + url
   }
 

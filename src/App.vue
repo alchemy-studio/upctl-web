@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-console.debug('[ticketweb] deploy_ver=20260507.001')
+console.debug('[ticketweb] deploy_ver=20260509.002')
 </script>
 
 <style>
