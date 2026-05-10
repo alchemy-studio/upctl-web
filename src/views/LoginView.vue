@@ -36,7 +36,7 @@ function initWxQr() {
   const container = document.getElementById('login-qr')
   if (!container) return
   const iframe = document.createElement('iframe')
-  const redirectUri = `https://${HOST}/wx-login`
+  const redirectUri = `https://${WX_REDIRECT_HOST}/ticket-wx-login`
   const url = 'https://open.weixin.qq.com/connect/qrconnect?' +
     `appid=${WX_APP}&scope=snsapi_login&redirect_uri=${encodeURIComponent(redirectUri)}` +
     `&state=${Math.random().toString(36).replace('.', '')}&login_type=jssdk&self_redirect=false` +

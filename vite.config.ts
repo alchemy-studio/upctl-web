@@ -7,6 +7,7 @@ const config = {
   ts: process.env.VITE_TS_SERVER !== undefined ? process.env.VITE_TS_SERVER : 'http://ts.localhost:8088',
   host: process.env.VITE_HOST || 'ticket.localhost:8088',
   wx_app: process.env.VITE_WX_APP || '',
+  wx_redirect_host: process.env.VITE_WX_REDIRECT_HOST || process.env.VITE_HOST || 'ticket.localhost:8088',
 }
 
 export default defineConfig({
@@ -21,6 +22,7 @@ export default defineConfig({
     UC_SERVER: JSON.stringify(config.main),
     TS_SERVER: JSON.stringify(config.ts),
     WX_APP: JSON.stringify(config.wx_app),
+    WX_REDIRECT_HOST: JSON.stringify(config.wx_redirect_host),
   },
   server: {
     port: 8010,
