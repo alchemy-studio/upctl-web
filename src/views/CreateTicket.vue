@@ -122,7 +122,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.create-page { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+.create-page { max-width: 800px; margin: 0 auto; padding: 0 16px 40px; min-height: 100vh; }
 .page-header { display: flex; align-items: center; gap: 12px; padding: 16px 0; }
 .page-header h1 { font-size: 20px; }
 .btn-text { background: none; border: none; color: #1a73e8; cursor: pointer; font-size: 14px; padding: 0; }

@@ -240,7 +240,7 @@ onMounted(fetchDetail)
 </script>
 
 <style scoped>
-.detail-page { max-width: 800px; margin: 0 auto; padding: 0 16px 24px; }
+.detail-page { max-width: 800px; margin: 0 auto; padding: 0 16px 40px; min-height: 100vh; }
 .detail-header { display: flex; align-items: center; gap: 12px; padding: 16px 0; }
 .detail-header h1 { font-size: 18px; color: #1a73e8; }
 .ticket-section { background: white; border-radius: 10px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }

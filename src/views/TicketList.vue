@@ -115,7 +115,7 @@ onMounted(() => { fetchTickets() })
 </script>
 
 <style scoped>
-.ticket-list-page { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+.ticket-list-page { max-width: 800px; margin: 0 auto; padding: 0 16px 40px; min-height: 100vh; }
 .page-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; }
 .page-header h1 { font-size: 20px; }
 .header-actions { display: flex; gap: 8px; align-items: center; }
