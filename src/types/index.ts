@@ -59,3 +59,12 @@ export interface TicketDetail {
   comments: TicketComment[]
   claude_prompt_prefix?: string
 }
+
+export interface Project {
+  id: string
+  name: string
+  repo_url?: string
+  memory_doc?: string
+  created_at: string
+  updated_at: string
+}

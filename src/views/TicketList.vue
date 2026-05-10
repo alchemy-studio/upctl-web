@@ -3,6 +3,7 @@
     <header class="page-header">
       <h1>工单列表</h1>
       <div class="header-actions">
+        <router-link to="/projects" class="btn btn-text">项目管理</router-link>
         <button class="btn btn-text" @click="goCreate">新建工单</button>
         <button class="btn btn-text" @click="logout">退出</button>
       </div>
