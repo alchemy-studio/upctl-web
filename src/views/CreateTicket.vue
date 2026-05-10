@@ -63,20 +63,13 @@ async function submit() {
   error.value = ''
   submitting.value = true
 
-  // Append selected projects to body as markdown
+  // Append selected projects to body as markdown references (no memory_doc or repo_url)
+  // The backend build_ticket_context will assemble the full prompt text including memory_doc
   let finalBody = body.value.trim()
   if (selectedProjectIds.value.length > 0) {
     const selected = projectStore.store.list.filter(p => selectedProjectIds.value.includes(p.id))
-    const projectsMd = selected.map(p => `- **${p.name}**${p.repo_url ? ` (${p.repo_url})` : ''}`).join('\n')
+    const projectsMd = selected.map(p => `- **${p.name}**`).join('\n')
     finalBody += `\n\n## 关联项目\n${projectsMd}`
-    if (selected.some(p => p.memory_doc)) {
-      finalBody += '\n\n### 项目 Memory\n'
-      for (const p of selected) {
-        if (p.memory_doc) {
-          finalBody += `\n#### ${p.name}\n${p.memory_doc}\n`
-        }
-      }
-    }
   }
 
   const { r, d, e } = await request({
