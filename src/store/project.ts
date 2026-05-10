@@ -39,12 +39,16 @@ export default function useProject() {
   }
 
   async function update(id: string, data: { name?: string; repo_url?: string; memory_doc?: string; is_open_source?: boolean; is_archived?: boolean }) {
-    const { r } = await request({
+    const { r, d } = await request({
       url: `/api/v2/upctl/api/projects/${id}`,
       method: 'PATCH',
       data,
     })
-    if (r) await fetchAll()
+    if (r && d) {
+      // In-place update to avoid full list re-render and scroll jump
+      const idx = store.list.findIndex(p => p.id === id)
+      if (idx >= 0) store.list[idx] = d
+    }
     return r
   }
 
