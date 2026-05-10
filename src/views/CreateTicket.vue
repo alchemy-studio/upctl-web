@@ -12,13 +12,13 @@
       </div>
       <div class="form-group">
         <label class="form-label">关联项目</label>
-        <div v-if="projectStore.loading" class="text-muted">加载中...</div>
+        <div v-if="projectStore.store.loading" class="text-muted">加载中...</div>
         <div v-else class="project-checkboxes">
-          <label v-for="p in projectStore.list" :key="p.id" class="checkbox-label">
+          <label v-for="p in projectStore.store.list" :key="p.id" class="checkbox-label">
             <input type="checkbox" :value="p.id" v-model="selectedProjectIds" />
             {{ p.name }}
           </label>
-          <div v-if="projectStore.list.length === 0" class="text-muted">暂无可选项目</div>
+          <div v-if="projectStore.store.list.length === 0" class="text-muted">暂无可选项目</div>
         </div>
       </div>
       <div class="form-group">
@@ -56,7 +56,7 @@ const uploading = ref(false)
 const error = ref('')
 const selectedProjectIds = ref<string[]>([])
 
-const canSubmit = computed(() => title.value.trim() && body.value.trim())
+const canSubmit = computed(() => title.value.trim().length > 0)
 
 async function submit() {
   if (!canSubmit.value || submitting.value) return

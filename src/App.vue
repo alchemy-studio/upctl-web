@@ -5,7 +5,19 @@
 </template>
 
 <script setup lang="ts">
-console.debug('[upctl-web] deploy_ver=20260510.015')
+import { onMounted } from 'vue'
+import useUser from '@/store/user'
+
+console.debug('[upctl-web] deploy_ver=20260510.018')
+
+// Load user roles on app mount so approve/project buttons work after page refresh
+const { read } = useUser()
+onMounted(async () => {
+  const token = window.localStorage.getItem('Authorization')
+  if (token) {
+    await read()
+  }
+})
 </script>
 
 <style>
