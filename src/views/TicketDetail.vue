@@ -41,20 +41,25 @@
           <button v-if="!hasLabel('in_progress')" class="btn btn-pin" @click="startProgress" :disabled="pinning">
             {{ pinning ? '处理中...' : '📌 开始处理' }}
           </button>
-        </div>
-        <h3>添加评论</h3>
-        <div class="upload-area">
-          <button class="upload-btn" type="button" @click="triggerUpload">📎 上传图片</button>
-          <input ref="fileInputRef" type="file" accept="image/*" hidden @change="uploadImage" />
-        </div>
-        <textarea v-model="commentText" rows="6" placeholder="输入评论内容..." class="comment-input"></textarea>
-        <div v-if="uploading" class="uploading">上传中...</div>
-        <div class="reply-actions">
-          <button @click="sendComment" :disabled="sending || isLocked" class="btn btn-primary">
-            {{ sending ? '发送中...' : '发送' }}
+          <button v-if="hasLabel('approved') && !hasLabel('in_progress')" class="btn btn-unapprove" @click="unapproveTicket" :disabled="unapproving">
+            {{ unapproving ? '取消中...' : '↩ 解除批准' }}
           </button>
         </div>
-        <div v-if="isLocked" class="lock-hint">该工单已锁定，仅管理员可以操作</div>
+        <div v-if="!isLocked">
+          <h3>添加评论</h3>
+          <div class="upload-area">
+            <button class="upload-btn" type="button" @click="triggerUpload">📎 上传图片</button>
+            <input ref="fileInputRef" type="file" accept="image/*" hidden @change="uploadImage" />
+          </div>
+          <textarea v-model="commentText" rows="6" placeholder="输入评论内容..." class="comment-input"></textarea>
+          <div v-if="uploading" class="uploading">上传中...</div>
+          <div class="reply-actions">
+            <button @click="sendComment" :disabled="sending" class="btn btn-primary">
+              {{ sending ? '发送中...' : '发送' }}
+            </button>
+          </div>
+        </div>
+        <div v-else class="lock-hint">该工单已锁定（已批准或处理中），无法添加评论</div>
       </div>
     </template>
   </div>
@@ -79,6 +84,7 @@ const sending = ref(false)
 const uploading = ref(false)
 const approving = ref(false)
 const pinning = ref(false)
+const unapproving = ref(false)
 
 const canManage = computed(() => checkRole('ADMIN') || checkRole('TESTER'))
 
@@ -88,7 +94,6 @@ function hasLabel(name: string) {
 
 const renderedBody = computed(() => renderMarkdown(ticket.value?.body || ''))
 const isLocked = computed(() => {
-  if (canManage.value) return false
   const labels = ticket.value?.labels || []
   return labels.some((l: any) => ['approved', 'in_progress'].includes(l.name))
 })
@@ -133,15 +138,52 @@ async function approveTicket() {
   if (r) await fetchDetail()
 }
 
+async function unapproveTicket() {
+  unapproving.value = true
+  const { r, e } = await request({
+    url: `/api/v2/upctl/api/tickets/${ticketNumber}`,
+    method: 'PATCH',
+    data: { unlabels: ['approved'] },
+  })
+  unapproving.value = false
+  if (r) await fetchDetail()
+}
+
 async function startProgress() {
   pinning.value = true
+  // First mark the ticket as in_progress
   const { r, e } = await request({
     url: `/api/v2/upctl/api/tickets/${ticketNumber}`,
     method: 'PATCH',
     data: { labels: ['in_progress'] },
   })
+  if (!r) {
+    pinning.value = false
+    return
+  }
+  await fetchDetail()
+  // Then trigger the agent to start working on this ticket
+  // The backend builds ticket context + memory instruction + prompt prefix
+  const prompt = '## 当前工单\n开始处理此工单。'
+  const { r: agentOk } = await request({
+    url: '/api/v2/upctl/api/agent/prompt',
+    method: 'POST',
+    data: {
+      prompt,
+      ticket_number: ticketNumber,
+      wait_secs: 5,
+    },
+  })
   pinning.value = false
-  if (r) await fetchDetail()
+  if (agentOk) {
+    // Add a comment to confirm agent was triggered
+    await request({
+      url: `/api/v2/upctl/api/tickets/${ticketNumber}/comments`,
+      method: 'POST',
+      data: { body: '🤖 已通知 agent 开始处理此工单。' },
+    })
+    await fetchDetail()
+  }
 }
 
 const fileInputRef = ref<HTMLInputElement | null>(null)
@@ -225,6 +267,8 @@ onMounted(fetchDetail)
 .btn-approve:disabled { background: #a5d6a7; cursor: not-allowed; }
 .btn-pin { padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; background: #e65100; color: white; }
 .btn-pin:disabled { background: #ffcc80; cursor: not-allowed; }
+.btn-unapprove { padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; background: #f9a825; color: white; }
+.btn-unapprove:disabled { background: #fff9c4; cursor: not-allowed; }
 .lock-hint { text-align: center; color: #999; font-size: 13px; margin-top: 8px; }
 .upload-area { margin-bottom: 8px; }
 .upload-btn { display: inline-block; padding: 6px 14px; background: #f0f0f0; border-radius: 6px; font-size: 13px; cursor: pointer; color: #666; }
