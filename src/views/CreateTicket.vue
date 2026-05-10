@@ -14,11 +14,11 @@
         <label class="form-label">关联项目</label>
         <div v-if="projectStore.store.loading" class="text-muted">加载中...</div>
         <div v-else class="project-checkboxes">
-          <label v-for="p in projectStore.store.list" :key="p.id" class="checkbox-label">
+          <label v-for="p in projectStore.activeList" :key="p.id" class="checkbox-label">
             <input type="checkbox" :value="p.id" v-model="selectedProjectIds" />
             {{ p.name }}
           </label>
-          <div v-if="projectStore.store.list.length === 0" class="text-muted">暂无可选项目</div>
+          <div v-if="projectStore.activeList.length === 0" class="text-muted">暂无可选项目</div>
         </div>
       </div>
       <div class="form-group">
@@ -67,7 +67,7 @@ async function submit() {
   // The backend build_ticket_context will assemble the full prompt text including memory_doc
   let finalBody = body.value.trim()
   if (selectedProjectIds.value.length > 0) {
-    const selected = projectStore.store.list.filter(p => selectedProjectIds.value.includes(p.id))
+    const selected = projectStore.activeList.filter(p => selectedProjectIds.value.includes(p.id))
     const projectsMd = selected.map(p => `- **${p.name}**`).join('\n')
     finalBody += `\n\n## 关联项目\n${projectsMd}`
   }

@@ -1,4 +1,4 @@
-import { reactive } from 'vue'
+import { reactive, computed } from 'vue'
 import request from '@/utils/request'
 import type { Project } from '@/types'
 
@@ -13,6 +13,8 @@ const store = reactive<ProjectState>({
 })
 
 export default function useProject() {
+  const activeList = computed(() => store.list.filter(p => !p.is_archived))
+
   async function fetchAll() {
     store.loading = true
     const { r, d } = await request({
@@ -26,7 +28,7 @@ export default function useProject() {
     }
   }
 
-  async function create(data: { name: string; repo_url?: string; memory_doc?: string; is_open_source?: boolean }) {
+  async function create(data: { name: string; repo_url?: string; memory_doc?: string; is_open_source?: boolean; is_archived?: boolean }) {
     const { r, d } = await request({
       url: '/api/v2/upctl/api/projects',
       method: 'POST',
@@ -36,7 +38,7 @@ export default function useProject() {
     return { r, d }
   }
 
-  async function update(id: string, data: { name?: string; repo_url?: string; memory_doc?: string }) {
+  async function update(id: string, data: { name?: string; repo_url?: string; memory_doc?: string; is_open_source?: boolean; is_archived?: boolean }) {
     const { r } = await request({
       url: `/api/v2/upctl/api/projects/${id}`,
       method: 'PATCH',
@@ -55,5 +57,5 @@ export default function useProject() {
     return r
   }
 
-  return { store, fetchAll, create, update, remove }
+  return { store, activeList, fetchAll, create, update, remove }
 }

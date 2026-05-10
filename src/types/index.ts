@@ -66,6 +66,7 @@ export interface Project {
   repo_url?: string
   memory_doc?: string
   is_open_source?: boolean
+  is_archived?: boolean
   created_at: string
   updated_at: string
 }

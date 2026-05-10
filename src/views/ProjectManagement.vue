@@ -15,7 +15,10 @@
         <div class="project-header">
           <span class="project-name">{{ p.name }}</span>
           <div class="project-actions">
+            <span v-if="p.is_archived" class="badge badge-archived">已归档</span>
             <button class="btn btn-sm" @click="openEdit(p)">编辑</button>
+            <button v-if="!p.is_archived" class="btn btn-sm btn-archive" @click="archiveProject(p)">归档</button>
+            <button v-if="p.is_archived" class="btn btn-sm btn-success" @click="unarchiveProject(p)">恢复</button>
             <button class="btn btn-sm btn-danger" @click="confirmDelete(p)">删除</button>
           </div>
         </div>
@@ -157,6 +160,14 @@ async function doDelete() {
   deleteTarget.value = null
 }
 
+async function archiveProject(p: Project) {
+  await update(p.id, { is_archived: true })
+}
+
+async function unarchiveProject(p: Project) {
+  await update(p.id, { is_archived: false })
+}
+
 onMounted(fetchAll)
 </script>
 
@@ -182,6 +193,9 @@ onMounted(fetchAll)
 .btn-danger { background: #fce4ec; color: #c62828; }
 .badge-open { display: inline-block; padding: 1px 8px; border-radius: 8px; font-size: 12px; background: #e8f5e9; color: #2e7d32; font-weight: 500; }
 .badge-private { display: inline-block; padding: 1px 8px; border-radius: 8px; font-size: 12px; background: #f3e5f5; color: #7b1fa2; font-weight: 500; }
+.badge-archived { display: inline-block; padding: 1px 8px; border-radius: 8px; font-size: 12px; background: #f5f5f5; color: #999; font-weight: 500; margin-right: 6px; }
+.btn-archive { background: #fff3e0; color: #e65100; }
+.btn-archive:hover { background: #ffe0b2; }
 .dialog-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; }
 .dialog { background: white; border-radius: 12px; padding: 24px; width: 90%; max-width: 500px; }
 .dialog-wide { max-width: 600px; }
