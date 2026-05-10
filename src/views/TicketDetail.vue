@@ -47,7 +47,7 @@
           <button class="upload-btn" type="button" @click="triggerUpload">📎 上传图片</button>
           <input ref="fileInputRef" type="file" accept="image/*" hidden @change="uploadImage" />
         </div>
-        <textarea v-model="commentText" rows="4" placeholder="输入评论内容..." class="comment-input"></textarea>
+        <textarea v-model="commentText" rows="6" placeholder="输入评论内容..." class="comment-input"></textarea>
         <div v-if="uploading" class="uploading">上传中...</div>
         <div class="reply-actions">
           <button @click="sendComment" :disabled="sending || isLocked" class="btn btn-primary">
@@ -198,7 +198,7 @@ onMounted(fetchDetail)
 </script>
 
 <style scoped>
-.detail-page { max-width: 800px; margin: 0 auto; padding: 0 16px 100px; }
+.detail-page { max-width: 800px; margin: 0 auto; padding: 0 16px 24px; }
 .detail-header { display: flex; align-items: center; gap: 12px; padding: 16px 0; }
 .detail-header h1 { font-size: 18px; color: #1a73e8; }
 .ticket-section { background: white; border-radius: 10px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }

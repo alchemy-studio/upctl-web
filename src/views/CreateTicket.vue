@@ -16,7 +16,7 @@
           <button class="upload-btn" type="button" @click="triggerUpload">📎 上传图片</button>
           <input ref="fileInputRef" type="file" accept="image/*" hidden @change="uploadImage" />
         </div>
-        <textarea v-model="body" rows="8" placeholder="请输入工单内容（支持 Markdown 格式）" class="form-textarea" @input="autoResize"></textarea>
+        <textarea v-model="body" rows="12" placeholder="请输入工单内容（支持 Markdown 格式）" class="form-textarea" @input="autoResize"></textarea>
         <div v-if="uploading" class="uploading">上传中...</div>
       </div>
       <div class="form-actions">
