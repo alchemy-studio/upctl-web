@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-console.debug('[upctl-web] deploy_ver=20260510.005')
+console.debug('[upctl-web] deploy_ver=20260510.006')
 </script>
 
 <style>
