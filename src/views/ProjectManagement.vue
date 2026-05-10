@@ -161,7 +161,7 @@ onMounted(fetchAll)
 </script>
 
 <style scoped>
-.page { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+.page { max-width: 800px; margin: 0 auto; padding: 0 16px 40px; min-height: 100vh; background: transparent; }
 .page-header { display: flex; align-items: center; gap: 12px; padding: 16px 0; }
 .page-header h1 { font-size: 20px; flex: 1; }
 .btn-text { background: none; border: none; color: #1a73e8; cursor: pointer; font-size: 14px; padding: 0; }
