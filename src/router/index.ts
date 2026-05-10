@@ -33,6 +33,11 @@ const router = createRouter({
       name: 'project-management',
       component: () => import('@/views/ProjectManagement.vue'),
     },
+    {
+      path: '/settings/prompt-prefix',
+      name: 'prompt-settings',
+      component: () => import('@/views/PromptSettings.vue'),
+    },
   ],
 })
 

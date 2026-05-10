@@ -69,7 +69,8 @@ const tickets = ref<Ticket[]>([])
 const loading = ref(false)
 const stateFilter = ref('open')
 const searchQuery = ref('')
-const hideE2E = ref(false)
+const hideE2E = ref(localStorage.getItem('hideE2E') === 'true')
+watch(hideE2E, (v) => localStorage.setItem('hideE2E', v ? 'true' : 'false'))
 let searchTimer: ReturnType<typeof setTimeout> | null = null
 
 async function fetchTickets() {

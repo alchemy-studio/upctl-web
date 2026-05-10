@@ -44,9 +44,9 @@
       </p>
       <div class="form-group">
         <label class="form-label">目录路径</label>
-        <div class="prefix-preview" v-if="currentMemoryDir">
+        <div class="prefix-preview">
           <strong>当前生效：</strong>
-          <pre class="preview-text">{{ currentMemoryDir }}</pre>
+          <pre class="preview-text">{{ currentMemoryDir || '(未配置 — memory 指令将不会追加到 prompt 中)' }}</pre>
         </div>
         <input
           v-model="memoryDirText"
