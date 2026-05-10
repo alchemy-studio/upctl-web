@@ -26,7 +26,7 @@ export default function useProject() {
     }
   }
 
-  async function create(data: { name: string; repo_url?: string; memory_doc?: string }) {
+  async function create(data: { name: string; repo_url?: string; memory_doc?: string; is_open_source?: boolean }) {
     const { r, d } = await request({
       url: '/api/v2/upctl/api/projects',
       method: 'POST',

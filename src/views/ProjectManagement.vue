@@ -24,6 +24,10 @@
             <label>仓库</label>
             <a :href="p.repo_url" target="_blank">{{ p.repo_url }}</a>
           </div>
+          <div class="project-detail">
+            <label>类型</label>
+            <span :class="p.is_open_source ? 'badge-open' : 'badge-private'">{{ p.is_open_source ? '开源' : '私有' }}</span>
+          </div>
           <div class="project-detail" v-if="p.memory_doc">
             <label>Memory</label>
             <div class="memory-preview">{{ p.memory_doc.slice(0, 200) }}{{ p.memory_doc.length > 200 ? '...' : '' }}</div>
@@ -43,6 +47,13 @@
         <div class="form-group">
           <label class="form-label">仓库 URL</label>
           <input v-model="form.repo_url" class="form-input" placeholder="https://github.com/..." />
+        </div>
+        <div class="form-group">
+          <label class="form-label">开源项目</label>
+          <label class="checkbox-label">
+            <input type="checkbox" v-model="form.is_open_source" />
+            是开源项目（prompt 时会附加密文泄漏警告）
+          </label>
         </div>
         <div class="form-group">
           <label class="form-label">Memory 文档 (Markdown)</label>
@@ -76,13 +87,13 @@ import useProject from '@/store/project'
 import type { Project } from '@/types'
 
 const router = useRouter()
-const { store, create, update, remove } = useProject()
+const { store, fetchAll, create, update, remove } = useProject()
 const showModal = ref(false)
 const isEditing = ref(false)
 const showDeleteConfirm = ref(false)
 const deleteTarget = ref<Project | null>(null)
 const editingId = ref('')
-const form = reactive({ name: '', repo_url: '', memory_doc: '' })
+const form = reactive({ name: '', repo_url: '', memory_doc: '', is_open_source: false })
 
 function goBack() {
   router.push('/')
@@ -94,6 +105,7 @@ function openCreate() {
   form.name = ''
   form.repo_url = ''
   form.memory_doc = ''
+  form.is_open_source = false
   showModal.value = true
 }
 
@@ -103,6 +115,7 @@ function openEdit(p: Project) {
   form.name = p.name
   form.repo_url = p.repo_url || ''
   form.memory_doc = p.memory_doc || ''
+  form.is_open_source = p.is_open_source || false
   showModal.value = true
 }
 
@@ -118,12 +131,14 @@ async function submit() {
       name: form.name.trim(),
       repo_url: form.repo_url.trim() || undefined,
       memory_doc: form.memory_doc.trim() || undefined,
+      is_open_source: form.is_open_source,
     })
   } else {
     const result = await create({
       name: form.name.trim(),
       repo_url: form.repo_url.trim() || undefined,
       memory_doc: form.memory_doc.trim() || undefined,
+      is_open_source: form.is_open_source,
     })
     ok = result.r
   }
@@ -143,11 +158,6 @@ async function doDelete() {
 }
 
 onMounted(fetchAll)
-
-// Need to use fetchAll from the import
-async function fetchAll() {
-  await store.fetchAll()
-}
 </script>
 
 <style scoped>
@@ -170,6 +180,8 @@ async function fetchAll() {
 .btn-sm { padding: 5px 12px; font-size: 12px; background: #f0f0f0; color: #333; }
 .btn-primary { background: #1a73e8; color: white; }
 .btn-danger { background: #fce4ec; color: #c62828; }
+.badge-open { display: inline-block; padding: 1px 8px; border-radius: 8px; font-size: 12px; background: #e8f5e9; color: #2e7d32; font-weight: 500; }
+.badge-private { display: inline-block; padding: 1px 8px; border-radius: 8px; font-size: 12px; background: #f3e5f5; color: #7b1fa2; font-weight: 500; }
 .dialog-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; }
 .dialog { background: white; border-radius: 12px; padding: 24px; width: 90%; max-width: 500px; }
 .dialog-wide { max-width: 600px; }
