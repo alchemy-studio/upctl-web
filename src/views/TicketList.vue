@@ -27,6 +27,9 @@
           <span :class="['state-badge', t.state]">{{ t.state === 'open' ? '待处理' : '已关闭' }}</span>
         </div>
         <div class="ticket-title">{{ t.title }}</div>
+        <div class="ticket-labels" v-if="t.labels?.length">
+          <span v-for="l in t.labels" :key="l.id" class="ticket-label" :style="{ background: '#' + l.color }">{{ l.name }}</span>
+        </div>
         <div class="ticket-meta">
           <span>{{ t.user?.login || 'unknown' }}</span>
           <span>{{ formatTime(t.created_at) }}</span>
@@ -97,6 +100,8 @@ onMounted(() => { fetchTickets() })
 .state-badge.open { background: #e8f5e9; color: #2e7d32; }
 .state-badge.closed { background: #f5f5f5; color: #999; }
 .ticket-title { font-size: 15px; margin-bottom: 6px; line-height: 1.4; }
+.ticket-labels { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; }
+.ticket-label { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 11px; color: #fff; font-weight: 500; }
 .ticket-meta { display: flex; justify-content: space-between; font-size: 12px; color: #999; }
 .loading, .empty { text-align: center; padding: 40px; color: #999; }
 </style>
