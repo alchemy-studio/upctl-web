@@ -33,7 +33,15 @@
         </div>
       </div>
 
-      <div v-if="ticket.state === 'open' && !isLocked" class="reply-section">
+      <div v-if="ticket.state === 'open'" class="reply-section">
+        <div class="reply-actions-bar" v-if="canManage">
+          <button v-if="!hasLabel('approved')" class="btn btn-approve" @click="approveTicket" :disabled="approving">
+            {{ approving ? '批准中...' : '✓ 批准工单' }}
+          </button>
+          <button v-if="!hasLabel('in_progress')" class="btn btn-pin" @click="startProgress" :disabled="pinning">
+            {{ pinning ? '处理中...' : '📌 开始处理' }}
+          </button>
+        </div>
         <h3>添加评论</h3>
         <div class="upload-area">
           <button class="upload-btn" type="button" @click="triggerUpload">📎 上传图片</button>
@@ -42,13 +50,11 @@
         <textarea v-model="commentText" rows="4" placeholder="输入评论内容..." class="comment-input"></textarea>
         <div v-if="uploading" class="uploading">上传中...</div>
         <div class="reply-actions">
-          <button @click="sendComment" :disabled="!commentText.trim() || sending" class="btn btn-primary">
+          <button @click="sendComment" :disabled="sending || isLocked" class="btn btn-primary">
             {{ sending ? '发送中...' : '发送' }}
           </button>
         </div>
-      </div>
-      <div v-if="ticket.state === 'open' && isLocked" class="reply-section" style="text-align:center;color:#999;padding:20px">
-        该工单已锁定，无法添加评论
+        <div v-if="isLocked" class="lock-hint">该工单已锁定，仅管理员可以操作</div>
       </div>
     </template>
   </div>
@@ -71,9 +77,18 @@ const loading = ref(false)
 const commentText = ref('')
 const sending = ref(false)
 const uploading = ref(false)
+const approving = ref(false)
+const pinning = ref(false)
+
+const canManage = computed(() => store.checkRole('ADMIN') || store.checkRole('TESTER'))
+
+function hasLabel(name: string) {
+  return ticket.value?.labels?.some((l: any) => l.name === name) ?? false
+}
 
 const renderedBody = computed(() => renderMarkdown(ticket.value?.body || ''))
 const isLocked = computed(() => {
+  if (canManage.value) return false
   const labels = ticket.value?.labels || []
   return labels.some((l: any) => ['approved', 'in_progress'].includes(l.name))
 })
@@ -93,7 +108,7 @@ async function fetchDetail() {
 }
 
 async function sendComment() {
-  if (!commentText.value.trim() || sending.value) return
+  if (sending.value) return
   sending.value = true
   const { r, e } = await request({
     url: `/api/v2/upctl/api/tickets/${ticketNumber}/comments`,
@@ -105,6 +120,28 @@ async function sendComment() {
     commentText.value = ''
     await fetchDetail()
   }
+}
+
+async function approveTicket() {
+  approving.value = true
+  const { r, e } = await request({
+    url: `/api/v2/upctl/api/tickets/${ticketNumber}`,
+    method: 'PATCH',
+    data: { labels: ['approved'] },
+  })
+  approving.value = false
+  if (r) await fetchDetail()
+}
+
+async function startProgress() {
+  pinning.value = true
+  const { r, e } = await request({
+    url: `/api/v2/upctl/api/tickets/${ticketNumber}`,
+    method: 'PATCH',
+    data: { labels: ['in_progress'] },
+  })
+  pinning.value = false
+  if (r) await fetchDetail()
 }
 
 const fileInputRef = ref<HTMLInputElement | null>(null)
@@ -183,6 +220,12 @@ onMounted(fetchDetail)
 .comment-body :deep(.md-img) { max-width: 100%; border-radius: 8px; margin: 8px 0; max-height: 300px; object-fit: contain; }
 .reply-section { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
 .reply-section h3 { font-size: 16px; margin-bottom: 12px; }
+.reply-actions-bar { display: flex; gap: 8px; margin-bottom: 12px; }
+.btn-approve { padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; background: #2e7d32; color: white; }
+.btn-approve:disabled { background: #a5d6a7; cursor: not-allowed; }
+.btn-pin { padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; background: #e65100; color: white; }
+.btn-pin:disabled { background: #ffcc80; cursor: not-allowed; }
+.lock-hint { text-align: center; color: #999; font-size: 13px; margin-top: 8px; }
 .upload-area { margin-bottom: 8px; }
 .upload-btn { display: inline-block; padding: 6px 14px; background: #f0f0f0; border-radius: 6px; font-size: 13px; cursor: pointer; color: #666; }
 .comment-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; resize: vertical; font-family: inherit; }
