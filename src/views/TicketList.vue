@@ -24,6 +24,12 @@
         @input="onSearchInput"
       />
     </div>
+    <div class="filter-row">
+      <label class="filter-e2e">
+        <input type="checkbox" v-model="hideE2E" @change="fetchTickets" />
+        隐藏 E2E 测试工单
+      </label>
+    </div>
     <div class="user-info" v-if="store.currentUser">
       👤 {{ store.currentUser.real_name }}
     </div>
@@ -63,6 +69,7 @@ const tickets = ref<Ticket[]>([])
 const loading = ref(false)
 const stateFilter = ref('open')
 const searchQuery = ref('')
+const hideE2E = ref(false)
 let searchTimer: ReturnType<typeof setTimeout> | null = null
 
 async function fetchTickets() {
@@ -70,6 +77,9 @@ async function fetchTickets() {
   const params: Record<string, any> = { state: stateFilter.value, page: 1, page_size: 50 }
   if (searchQuery.value.trim()) {
     params.q = searchQuery.value.trim()
+  }
+  if (hideE2E.value) {
+    params.hide_e2e = 'true'
   }
   const { r, d, e } = await request({
     url: '/api/v2/upctl/api/tickets',
@@ -116,6 +126,8 @@ onMounted(() => { fetchTickets() })
 .search-bar { margin-bottom: 8px; }
 .search-input { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; font-family: inherit; box-sizing: border-box; }
 .search-input:focus { border-color: #1a73e8; }
+.filter-row { margin-bottom: 8px; }
+.filter-e2e { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #666; cursor: pointer; }
 .user-info { padding: 8px 0; color: #666; font-size: 14px; }
 .ticket-list { display: flex; flex-direction: column; gap: 8px; padding-bottom: 20px; }
 .ticket-card { background: white; border-radius: 10px; padding: 14px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: box-shadow 0.2s; }
