@@ -9,7 +9,7 @@
 import { ref, onMounted } from 'vue'
 import useUser from '@/store/user'
 
-console.debug('[upctl-web] deploy_ver=20260510.018')
+console.debug('[upctl-web] deploy_ver=20260510.019')
 
 // Block rendering until user roles are loaded so checkRole() works reliably
 const initializing = ref(true)
