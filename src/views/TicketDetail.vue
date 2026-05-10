@@ -151,11 +151,11 @@ async function unapproveTicket() {
 
 async function startProgress() {
   pinning.value = true
-  // First mark the ticket as in_progress
+  // Start processing implies approval: add approved + in_progress labels
   const { r, e } = await request({
     url: `/api/v2/upctl/api/tickets/${ticketNumber}`,
     method: 'PATCH',
-    data: { labels: ['in_progress'] },
+    data: { labels: ['approved', 'in_progress'] },
   })
   if (!r) {
     pinning.value = false
