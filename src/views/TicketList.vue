@@ -4,6 +4,7 @@
       <h1>工单列表</h1>
       <div class="header-actions">
         <router-link to="/projects" class="btn btn-text">项目管理</router-link>
+        <router-link to="/settings/prompt-prefix" class="btn btn-text">提示词模版</router-link>
         <button class="btn btn-text" @click="goCreate">新建工单</button>
         <button class="btn btn-text" @click="logout">退出</button>
       </div>
@@ -15,6 +16,14 @@
       <button :class="['tab', { active: stateFilter === 'all' }]" @click="stateFilter = 'all'">全部</button>
     </div>
 
+    <div class="search-bar">
+      <input
+        v-model="searchQuery"
+        class="search-input"
+        placeholder="搜索工单标题或内容..."
+        @input="onSearchInput"
+      />
+    </div>
     <div class="user-info" v-if="store.currentUser">
       👤 {{ store.currentUser.real_name }}
     </div>
@@ -53,17 +62,30 @@ const router = useRouter()
 const tickets = ref<Ticket[]>([])
 const loading = ref(false)
 const stateFilter = ref('open')
+const searchQuery = ref('')
+let searchTimer: ReturnType<typeof setTimeout> | null = null
 
 async function fetchTickets() {
   loading.value = true
+  const params: Record<string, any> = { state: stateFilter.value, page: 1, page_size: 50 }
+  if (searchQuery.value.trim()) {
+    params.q = searchQuery.value.trim()
+  }
   const { r, d, e } = await request({
     url: '/api/v2/upctl/api/tickets',
-    params: { state: stateFilter.value, page: 1, page_size: 50 },
+    params,
   })
   loading.value = false
   if (r && d) {
     tickets.value = d.tickets || d
   }
+}
+
+function onSearchInput() {
+  if (searchTimer) clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => {
+    fetchTickets()
+  }, 300)
 }
 
 function goDetail(number: number) {
@@ -91,6 +113,9 @@ onMounted(() => { fetchTickets() })
 .tab-bar { display: flex; gap: 8px; margin-bottom: 12px; }
 .tab { padding: 8px 20px; border: 1px solid #ddd; border-radius: 20px; background: white; cursor: pointer; font-size: 14px; }
 .tab.active { background: #1a73e8; color: white; border-color: #1a73e8; }
+.search-bar { margin-bottom: 8px; }
+.search-input { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; font-family: inherit; box-sizing: border-box; }
+.search-input:focus { border-color: #1a73e8; }
 .user-info { padding: 8px 0; color: #666; font-size: 14px; }
 .ticket-list { display: flex; flex-direction: column; gap: 8px; padding-bottom: 20px; }
 .ticket-card { background: white; border-radius: 10px; padding: 14px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: box-shadow 0.2s; }
