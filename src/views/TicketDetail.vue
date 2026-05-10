@@ -68,7 +68,7 @@ import type { Ticket, TicketComment, TicketDetail } from '@/types'
 import dayjs from 'dayjs'
 import useUser from '@/store/user'
 
-const { store } = useUser()
+const { store, checkRole } = useUser()
 const route = useRoute()
 const router = useRouter()
 const ticket = ref<Ticket | null>(null)
@@ -80,7 +80,7 @@ const uploading = ref(false)
 const approving = ref(false)
 const pinning = ref(false)
 
-const canManage = computed(() => store.checkRole('ADMIN') || store.checkRole('TESTER'))
+const canManage = computed(() => checkRole('ADMIN') || checkRole('TESTER'))
 
 function hasLabel(name: string) {
   return ticket.value?.labels?.some((l: any) => l.name === name) ?? false
