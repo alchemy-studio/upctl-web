@@ -26,7 +26,7 @@
         <div v-if="comments.length === 0" class="empty">暂无评论</div>
         <div v-for="c in comments" :key="c.id" class="comment-card">
           <div class="comment-header">
-            <strong>{{ c.user.login }}</strong>
+            <strong>{{ commentAuthor(c) }}</strong>
             <span class="comment-time">{{ formatTime(c.created_at) }}</span>
           </div>
           <div class="comment-body" v-html="renderCommentBody(c.body)"></div>
@@ -118,7 +118,10 @@ async function sendComment() {
   const { r, e } = await request({
     url: `/api/v2/upctl/api/tickets/${ticketNumber}/comments`,
     method: 'POST',
-    data: { body: commentText.value },
+    data: {
+      body: commentText.value,
+      submitter_name: store.currentUser?.real_name || undefined,
+    },
   })
   sending.value = false
   if (r) {
@@ -207,8 +210,20 @@ async function uploadImage(e: Event) {
   }
 }
 
+function commentAuthor(c: TicketComment): string {
+  const body = c.body || ''
+  // Check if body starts with "> Name" (submitter_name prefix from backend)
+  const match = body.match(/^>\s*([^\n]+)\n/)
+  if (match) {
+    return match[1].trim()
+  }
+  return c.user?.login || 'unknown'
+}
+
 function renderCommentBody(body: string) {
-  return renderMarkdown(body)
+  // Remove the submitter_name prefix line if present
+  const cleaned = body.replace(/^>\s*[^\n]*\n(\n)?/, '')
+  return renderMarkdown(cleaned)
 }
 
 function renderMarkdown(text: string): string {
