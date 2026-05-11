@@ -35,7 +35,7 @@
     </div>
 
     <div class="ticket-list">
-      <div v-if="loading" class="loading">加载中...</div>
+      <div v-if="loading && tickets.length === 0" class="loading">加载中...</div>
       <div v-else-if="tickets.length === 0" class="empty">暂无工单</div>
       <div v-for="t in tickets" :key="t.number" class="ticket-card" @click="goDetail(t.number)">
         <div class="ticket-header">
@@ -52,6 +52,11 @@
         </div>
       </div>
     </div>
+    <div v-if="hasMore" class="load-more-wrap">
+      <button class="btn btn-outline" @click="loadMore" :disabled="loading">
+        {{ loading ? '加载中...' : '加载更多' }}
+      </button>
+    </div>
   </div>
 </template>
 
@@ -67,15 +72,23 @@ const { store, logout } = useUser()
 const router = useRouter()
 const tickets = ref<Ticket[]>([])
 const loading = ref(false)
+const currentPage = ref(1)
+const totalCount = ref(0)
+const hasMore = computed(() => tickets.value.length < totalCount.value)
+const PAGE_SIZE = 50
 const stateFilter = ref('open')
 const searchQuery = ref('')
 const hideE2E = ref(localStorage.getItem('hideE2E') === 'true')
 watch(hideE2E, (v) => localStorage.setItem('hideE2E', v ? 'true' : 'false'))
 let searchTimer: ReturnType<typeof setTimeout> | null = null
 
-async function fetchTickets() {
+async function fetchTickets(reset = true) {
+  if (reset) {
+    currentPage.value = 1
+    tickets.value = []
+  }
   loading.value = true
-  const params: Record<string, any> = { state: stateFilter.value, page: 1, page_size: 50 }
+  const params: Record<string, any> = { state: stateFilter.value, page: currentPage.value, page_size: PAGE_SIZE }
   if (searchQuery.value.trim()) {
     params.q = searchQuery.value.trim()
   }
@@ -88,8 +101,14 @@ async function fetchTickets() {
   })
   loading.value = false
   if (r && d) {
-    tickets.value = d.tickets || d
+    tickets.value = [...tickets.value, ...(d.tickets || d)]
+    if (d.total_count) totalCount.value = d.total_count
   }
+}
+
+function loadMore() {
+  currentPage.value++
+  fetchTickets(false)
 }
 
 function onSearchInput() {
@@ -143,4 +162,8 @@ onMounted(() => { fetchTickets() })
 .ticket-label { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 11px; color: #fff; font-weight: 500; }
 .ticket-meta { display: flex; justify-content: space-between; font-size: 12px; color: #999; }
 .loading, .empty { text-align: center; padding: 40px; color: #999; }
+.load-more-wrap { text-align: center; padding: 20px; }
+.btn-outline { padding: 8px 32px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer; font-size: 14px; color: #666; }
+.btn-outline:hover { background: #f5f5f5; border-color: #bbb; }
+.btn-outline:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>
