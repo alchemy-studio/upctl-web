@@ -14,9 +14,9 @@
         <label class="form-label">关联项目</label>
         <div v-if="projectStore.store.loading" class="text-muted">加载中...</div>
         <div v-else class="project-checkboxes">
-          <label v-for="p in (projectStore.activeList || [])" :key="p?.id ?? 'loading'" class="checkbox-label">
-            <input type="checkbox" :value="p?.id" v-model="selectedProjectIds" />
-            {{ p?.name || '加载中...' }}
+          <label v-for="p in activeList" :key="p.id" class="checkbox-label">
+            <input type="checkbox" :value="p.id" v-model="selectedProjectIds" />
+            {{ p.name }}
           </label>
           <div v-if="projectStore.store.list.length === 0" class="text-muted">暂无可选项目</div>
         </div>
@@ -49,6 +49,7 @@ import useProject from '@/store/project'
 
 const router = useRouter()
 const projectStore = useProject()
+const activeList = projectStore.activeList
 
 const title = ref('')
 const body = ref('')
@@ -117,8 +118,15 @@ function autoResize(e: Event) {
   ta.style.height = ta.scrollHeight + 'px'
 }
 
-onMounted(() => {
-  projectStore.fetchAll()
+onMounted(async () => {
+  await projectStore.fetchAll()
+  console.debug('[CreateTicket] projects loaded:', projectStore.store.list.length, 'items')
+  if (projectStore.store.list.length > 0) {
+    console.debug('[CreateTicket] first project:', JSON.stringify({
+      id: projectStore.store.list[0].id,
+      name: projectStore.store.list[0].name,
+    }))
+  }
 })
 </script>
 
