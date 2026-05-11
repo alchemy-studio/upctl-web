@@ -74,7 +74,16 @@ const tickets = ref<Ticket[]>([])
 const loading = ref(false)
 const currentPage = ref(1)
 const totalCount = ref(0)
-const hasMore = computed(() => tickets.value.length < totalCount.value)
+const hasMore = computed(() => {
+  const visible = tickets.value.length
+  if (totalCount.value <= 0) return false
+  if (visible >= totalCount.value) return false
+  // When hideE2E is active, totalCount from API may include filtered E2E tickets.
+  // The visible tickets already exclude E2E (server-side filter).
+  // If totalCount <= PAGE_SIZE, all tickets fit on one page regardless of filtering.
+  // Only show "load more" when there clearly are more pages of data.
+  return visible >= PAGE_SIZE || totalCount.value > PAGE_SIZE
+})
 const PAGE_SIZE = 50
 const stateFilter = ref('open')
 const searchQuery = ref('')
