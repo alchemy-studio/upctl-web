@@ -44,6 +44,9 @@
           <button v-if="hasLabel('approved') && !hasLabel('in_progress')" class="btn btn-unapprove" @click="unapproveTicket" :disabled="unapproving">
             {{ unapproving ? '取消中...' : '↩ 解除批准' }}
           </button>
+          <button class="btn btn-close" @click="closeTicket" :disabled="closing">
+            {{ closing ? '关闭中...' : '✕ 关闭工单' }}
+          </button>
         </div>
         <div v-if="!isLocked">
           <h3>添加评论</h3>
@@ -85,6 +88,7 @@ const uploading = ref(false)
 const approving = ref(false)
 const pinning = ref(false)
 const unapproving = ref(false)
+const closing = ref(false)
 
 const canManage = computed(() => checkRole('ADMIN') || checkRole('TESTER'))
 
@@ -168,13 +172,15 @@ async function startProgress() {
   // Then trigger the agent to start working on this ticket
   // The backend builds ticket context + memory instruction + prompt prefix
   const prompt = '## 当前工单\n开始处理此工单。'
+  // Fire-and-forget: use short wait_secs to avoid browser timeout (nginx 499).
+  // The agent receives the prompt regardless of whether we wait for a response.
   const { r: agentOk } = await request({
     url: '/api/v2/upctl/api/agent/prompt',
     method: 'POST',
     data: {
       prompt,
       ticket_number: ticketNumber,
-      wait_secs: 5,
+      wait_secs: 1,
     },
   })
   pinning.value = false
@@ -187,6 +193,18 @@ async function startProgress() {
     })
     await fetchDetail()
   }
+}
+
+async function closeTicket() {
+  if (!confirm('确认关闭此工单？关闭后无法恢复。')) return
+  closing.value = true
+  const { r, e } = await request({
+    url: `/api/v2/upctl/api/tickets/${ticketNumber}`,
+    method: 'PATCH',
+    data: { state: 'closed' },
+  })
+  closing.value = false
+  if (r) await fetchDetail()
 }
 
 const fileInputRef = ref<HTMLInputElement | null>(null)
@@ -284,6 +302,8 @@ onMounted(fetchDetail)
 .btn-pin:disabled { background: #ffcc80; cursor: not-allowed; }
 .btn-unapprove { padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; background: #f9a825; color: white; }
 .btn-unapprove:disabled { background: #fff9c4; cursor: not-allowed; }
+.btn-close { padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; background: #c62828; color: white; }
+.btn-close:disabled { background: #ef9a9a; cursor: not-allowed; }
 .lock-hint { text-align: center; color: #999; font-size: 13px; margin-top: 8px; }
 .upload-area { margin-bottom: 8px; }
 .upload-btn { display: inline-block; padding: 6px 14px; background: #f0f0f0; border-radius: 6px; font-size: 13px; cursor: pointer; color: #666; }
