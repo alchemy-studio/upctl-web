@@ -257,7 +257,25 @@ function renderMarkdown(text: string): string {
     .replace(/>/g, '&gt;')
   // images
   html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="md-img" />')
-  // links
+  // file attachments (uploaded via /api/v2/upctl/api/attachment/...)
+  html = html.replace(
+    /\[([^\]]+)\]\(\/api\/v2\/upctl\/api\/attachment\/([^)]+)\)/g,
+    (match: string, text: string, urlSuffix: string) => {
+      const ext = urlSuffix.split('.').pop()?.toLowerCase() || ''
+      const isPdf = ext === 'pdf'
+      const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext)
+      const fullUrl = `/api/v2/upctl/api/attachment/${urlSuffix}`
+      if (isImage) {
+        return `<img src="${fullUrl}" alt="${text}" class="md-img" />`
+      }
+      const icon = isPdf ? '📄' : '📎'
+      const openHtml = isPdf
+        ? `<a href="${fullUrl}" target="_blank" class="file-open-btn" title="在新标签页打开">打开</a>`
+        : `<a href="${fullUrl}" target="_blank" class="file-open-btn" download title="下载文件">下载</a>`
+      return `<div class="file-attachment"><span class="file-icon">${icon}</span><span class="file-name">${text}</span>${openHtml}</div>`
+    }
+  )
+  // regular links (non-attachment)
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
   // line breaks
   html = html.replace(/\n/g, '<br/>')
@@ -317,6 +335,11 @@ onMounted(fetchDetail)
 .btn-primary { padding: 10px 24px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; background: #1a73e8; color: white; }
 .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
 .btn-text { background: none; border: none; color: #1a73e8; cursor: pointer; font-size: 14px; padding: 0; }
+.file-attachment { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: #f8f9ff; border: 1px solid #e0e3f0; border-radius: 8px; margin: 8px 0; }
+.file-icon { font-size: 20px; flex-shrink: 0; }
+.file-name { flex: 1; font-size: 13px; color: #333; word-break: break-all; }
+.file-open-btn { padding: 4px 12px; border-radius: 6px; font-size: 12px; background: #1a73e8; color: white; text-decoration: none; flex-shrink: 0; }
+.file-open-btn:hover { background: #1557b0; }
 .loading, .empty { text-align: center; padding: 40px; color: #999; }
 .uploading { font-size: 13px; color: #1a73e8; margin: 4px 0; }
 </style>
