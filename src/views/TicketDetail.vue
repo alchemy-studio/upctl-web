@@ -259,19 +259,18 @@ function renderMarkdown(text: string): string {
   html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="md-img" />')
   // file attachments (uploaded via /api/v2/upctl/api/attachment/...)
   html = html.replace(
-    /\[([^\]]*)\]\(\/api\/v2\/upctl\/api\/attachment\/([^?]+)(\?[^)]*)?\)/g,
-    (match: string, text: string, rawFilename: string) => {
-      const ext = rawFilename.split('.').pop()?.toLowerCase() || ''
+    /\[([^\]]*)\]\(\/api\/v2\/upctl\/api\/attachment\/([^)]+)\)/g,
+    (match: string, text: string, fullUrl: string) => {
+      const rawName = fullUrl.split('?')[0]
+      const ext = rawName.split('.').pop()?.toLowerCase() || ''
       const imgExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp']
-      const isImg = imgExts.includes(ext)
-      if (isImg) {
-        return `<img src="/api/v2/upctl/api/attachment/${rawFilename}" alt="${text}" class="md-img" />`
+      if (imgExts.includes(ext)) {
+        return `<img src="/api/v2/upctl/api/attachment/${fullUrl}" alt="${text}" class="md-img" />`
       }
-      // Use filename from URL, fall back to markdown link text
-      const displayName = rawFilename || text || 'Attachment'
+      const displayName = rawName.split('/').pop() || text || 'Attachment'
       const iconMap: Record<string, string> = { pdf: '\u{1F4C4}', doc: '\u{1F4DD}', docx: '\u{1F4DD}', xls: '\u{1F4CA}', xlsx: '\u{1F4CA}', zip: '\u{1F4E6}', rar: '\u{1F4E6}', '7z': '\u{1F4E6}', txt: '\u{1F4C4}' }
       const icon = iconMap[ext] || '\u{1F4CE}'
-      return `<div class="file-attachment-box"><div class="file-attachment-icon">${icon}</div><div class="file-attachment-info"><div class="file-attachment-name">${displayName}</div><div class="file-attachment-meta">${ext.toUpperCase()} 文件</div></div><a href="/api/v2/upctl/api/attachment/${rawFilename}" target="_blank" class="file-attachment-dl">${ext === 'pdf' ? '预览' : '下载'}</a></div>`
+      return `<div class="file-attachment-box"><div class="file-attachment-icon">${icon}</div><div class="file-attachment-info"><div class="file-attachment-name">${displayName}</div><div class="file-attachment-meta">${ext.toUpperCase()} 文件</div></div><a href="/api/v2/upctl/api/attachment/${fullUrl}" target="_blank" class="file-attachment-dl">${ext === 'pdf' ? '预览' : '下载'}</a></div>`
     }
   )
   // regular links (non-attachment)
@@ -334,14 +333,14 @@ onMounted(fetchDetail)
 .btn-primary { padding: 10px 24px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; background: #1a73e8; color: white; }
 .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
 .btn-text { background: none; border: none; color: #1a73e8; cursor: pointer; font-size: 14px; padding: 0; }
-.file-attachment-box { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 8px; margin: 12px 0; }
-.file-attachment-box:hover { background: #eee; }
-.file-attachment-icon { font-size: 28px; flex-shrink: 0; line-height: 1; }
-.file-attachment-info { flex: 1; min-width: 0; }
-.file-attachment-name { font-size: 13px; color: #333; font-weight: 600; word-break: break-all; line-height: 1.4; }
-.file-attachment-meta { font-size: 11px; color: #999; margin-top: 2px; }
-.file-attachment-dl { padding: 6px 16px; border-radius: 6px; font-size: 13px; background: #1a73e8; color: white; text-decoration: none; flex-shrink: 0; font-weight: 500; }
-.file-attachment-dl:hover { background: #1557b0; }
+:deep(.file-attachment-box) { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 8px; margin: 12px 0; }
+:deep(.file-attachment-box:hover) { background: #eee; }
+:deep(.file-attachment-icon) { font-size: 28px; flex-shrink: 0; line-height: 1; }
+:deep(.file-attachment-info) { flex: 1; min-width: 0; }
+:deep(.file-attachment-name) { font-size: 13px; color: #333; font-weight: 600; word-break: break-all; line-height: 1.4; }
+:deep(.file-attachment-meta) { font-size: 11px; color: #999; margin-top: 2px; }
+:deep(.file-attachment-dl) { padding: 6px 16px; border-radius: 6px; font-size: 13px; background: #1a73e8; color: white; text-decoration: none; flex-shrink: 0; font-weight: 500; display: inline-block; }
+:deep(.file-attachment-dl:hover) { background: #1557b0; }
 .loading, .empty { text-align: center; padding: 40px; color: #999; }
 .uploading { font-size: 13px; color: #1a73e8; margin: 4px 0; }
 </style>
