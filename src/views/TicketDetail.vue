@@ -51,8 +51,8 @@
         <div v-if="!isLocked">
           <h3>添加评论</h3>
           <div class="upload-area">
-            <button class="upload-btn" type="button" @click="triggerUpload">📎 上传图片</button>
-            <input ref="fileInputRef" type="file" accept="image/*" hidden @change="uploadImage" />
+            <button class="upload-btn" type="button" @click="triggerUpload">📎 上传附件</button>
+            <input ref="fileInputRef" type="file" accept="image/*,.pdf,.doc,.docx,.txt" hidden @change="uploadImage" />
           </div>
           <textarea v-model="commentText" rows="6" placeholder="输入评论内容..." class="comment-input"></textarea>
           <div v-if="uploading" class="uploading">上传中...</div>
@@ -224,7 +224,12 @@ async function uploadImage(e: Event) {
   })
   uploading.value = false
   if (r && d?.url) {
-    commentText.value += `\n![image](${d.url})\n`
+    const isImage = file.type.startsWith('image/')
+    if (isImage) {
+      commentText.value += `\n![${file.name}](${d.url})\n`
+    } else {
+      commentText.value += `\n[${file.name}](${d.url})\n`
+    }
   }
 }
 

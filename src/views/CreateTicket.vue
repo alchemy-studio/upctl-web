@@ -21,8 +21,8 @@
       <div class="mb-4">
         <label class="block text-sm font-semibold text-text mb-2">内容</label>
         <div class="mb-2">
-          <button class="inline-block px-3.5 py-1.5 bg-gray-100 rounded-lg text-xs cursor-pointer text-text-muted" type="button" @click="triggerUpload">📎 上传图片</button>
-          <input ref="fileInputRef" type="file" accept="image/*" hidden @change="uploadImage" />
+          <button class="inline-block px-3.5 py-1.5 bg-gray-100 rounded-lg text-xs cursor-pointer text-text-muted" type="button" @click="triggerUpload">📎 上传附件</button>
+          <input ref="fileInputRef" type="file" accept="image/*,.pdf,.doc,.docx,.txt" hidden @change="uploadImage" />
         </div>
         <textarea v-model="body" rows="12" placeholder="请输入工单内容（支持 Markdown 格式）" class="w-full px-3 py-3 border border-border rounded-lg text-sm resize-y font-sans outline-none focus:border-primary" @input="autoResize"></textarea>
         <div v-if="uploading" class="text-xs text-primary mt-1">上传中...</div>
@@ -101,7 +101,12 @@ async function uploadImage(e: Event) {
   })
   uploading.value = false
   if (r && d?.url) {
-    body.value += `\n![image](${d.url})\n`
+    const isImage = file.type.startsWith('image/')
+    if (isImage) {
+      body.value += `\n![${file.name}](${d.url})\n`
+    } else {
+      body.value += `\n[${file.name}](${d.url})\n`
+    }
   }
 }
 
