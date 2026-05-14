@@ -11,7 +11,7 @@
     <div v-else-if="store.list.length === 0" class="text-center py-10 text-[#999]">暂无项目，点击上方按钮新建</div>
 
     <div v-else class="flex flex-col gap-3 pb-6">
-      <div v-for="p in store.list" :key="p.id" class="bg-surface rounded-xl shadow-sm overflow-hidden">
+      <div v-for="p in store.list" :key="p.id" class="bg-surface rounded-xl shadow-sm overflow-hidden project-card">
         <div class="flex justify-between items-center px-4 py-3.5 bg-gray-50 border-b border-border">
           <span class="text-base font-semibold text-[#333]">{{ p.name }}</span>
           <div class="flex gap-1.5 items-center">
