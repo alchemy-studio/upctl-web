@@ -1,59 +1,86 @@
 <template>
-  <div class="ticket-list-page">
-    <header class="page-header">
-      <h1>工单列表</h1>
-      <div class="header-actions">
-        <router-link to="/projects" class="btn btn-text">项目管理</router-link>
-        <router-link to="/settings/prompt-prefix" class="btn btn-text">提示词模版</router-link>
-        <button class="btn btn-text" @click="goCreate">新建工单</button>
-        <button class="btn btn-text" @click="logout">退出</button>
-      </div>
-    </header>
-
-    <div class="tab-bar">
-      <button :class="['tab', { active: stateFilter === 'open' }]" @click="stateFilter = 'open'">待处理</button>
-      <button :class="['tab', { active: stateFilter === 'closed' }]" @click="stateFilter = 'closed'">已关闭</button>
-      <button :class="['tab', { active: stateFilter === 'all' }]" @click="stateFilter = 'all'">全部</button>
+  <div class="max-w-2xl mx-auto px-4 pb-10 min-h-screen">
+    <div class="flex gap-2 mb-3">
+      <button
+        :class="[
+          'border border-border rounded-full px-5 py-2 text-sm cursor-pointer',
+          stateFilter === 'open' ? 'bg-primary text-white' : 'bg-white text-text'
+        ]"
+        @click="stateFilter = 'open'"
+      >待处理</button>
+      <button
+        :class="[
+          'border border-border rounded-full px-5 py-2 text-sm cursor-pointer',
+          stateFilter === 'closed' ? 'bg-primary text-white' : 'bg-white text-text'
+        ]"
+        @click="stateFilter = 'closed'"
+      >已关闭</button>
+      <button
+        :class="[
+          'border border-border rounded-full px-5 py-2 text-sm cursor-pointer',
+          stateFilter === 'all' ? 'bg-primary text-white' : 'bg-white text-text'
+        ]"
+        @click="stateFilter = 'all'"
+      >全部</button>
     </div>
 
-    <div class="search-bar">
+    <div class="mb-2">
       <input
         v-model="searchQuery"
-        class="search-input"
+        class="w-full px-3.5 py-2.5 border border-border rounded-lg text-sm outline-none focus:border-primary"
         placeholder="搜索工单标题或内容..."
         @input="onSearchInput"
       />
     </div>
-    <div class="filter-row">
-      <label class="filter-e2e">
+    <div class="mb-2">
+      <label class="flex items-center gap-1 text-xs text-text-muted cursor-pointer">
         <input type="checkbox" v-model="hideE2E" @change="fetchTickets" />
         隐藏 E2E 测试工单
       </label>
     </div>
-    <div class="user-info" v-if="store.currentUser">
+    <div v-if="store.currentUser" class="text-text-muted text-sm py-2">
       👤 {{ store.currentUser.real_name }}
     </div>
 
-    <div class="ticket-list">
-      <div v-if="loading && tickets.length === 0" class="loading">加载中...</div>
-      <div v-else-if="tickets.length === 0" class="empty">暂无工单</div>
-      <div v-for="t in tickets" :key="t.number" class="ticket-card" @click="goDetail(t.number)">
-        <div class="ticket-header">
-          <span class="ticket-number">#{{ t.number }}</span>
-          <span :class="['state-badge', t.state]">{{ t.state === 'open' ? '待处理' : '已关闭' }}</span>
+    <div class="flex flex-col gap-2 pb-5">
+      <div v-if="loading && tickets.length === 0" class="text-center py-10 text-text-muted">加载中...</div>
+      <div v-else-if="tickets.length === 0" class="text-center py-10 text-text-muted">暂无工单</div>
+      <div
+        v-for="t in tickets"
+        :key="t.number"
+        class="bg-surface rounded-xl shadow-sm p-3.5 cursor-pointer hover:shadow-md"
+        @click="goDetail(t.number)"
+      >
+        <div class="flex justify-between items-center mb-1.5">
+          <span class="text-primary font-semibold text-xs">#{{ t.number }}</span>
+          <span
+            :class="[
+              'rounded-full px-2 py-0.5 text-xs',
+              t.state === 'open' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+            ]"
+          >{{ t.state === 'open' ? '待处理' : '已关闭' }}</span>
         </div>
-        <div class="ticket-title">{{ t.title }}</div>
-        <div class="ticket-labels" v-if="t.labels?.length">
-          <span v-for="l in t.labels" :key="l.id" class="ticket-label" :style="{ background: '#' + l.color }">{{ l.name }}</span>
+        <div class="text-sm mb-1.5 leading-snug">{{ t.title }}</div>
+        <div v-if="t.labels?.length" class="flex gap-1 flex-wrap mb-1.5">
+          <span
+            v-for="l in t.labels"
+            :key="l.id"
+            class="inline-block px-1 py-0.5 rounded text-xs font-medium text-white"
+            :style="{ background: '#' + l.color }"
+          >{{ l.name }}</span>
         </div>
-        <div class="ticket-meta">
+        <div class="flex justify-between text-xs text-text-muted">
           <span>{{ t.user?.login || 'unknown' }}</span>
           <span>{{ formatTime(t.created_at) }}</span>
         </div>
       </div>
     </div>
-    <div v-if="hasMore" class="load-more-wrap">
-      <button class="btn btn-outline" @click="loadMore" :disabled="loading">
+    <div v-if="hasMore" class="text-center py-5">
+      <button
+        class="bg-primary text-white rounded-lg px-4 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+        :disabled="loading"
+        @click="loadMore"
+      >
         {{ loading ? '加载中...' : '加载更多' }}
       </button>
     </div>
@@ -78,10 +105,6 @@ const hasMore = computed(() => {
   const visible = tickets.value.length
   if (totalCount.value <= 0) return false
   if (visible >= totalCount.value) return false
-  // When hideE2E is active, totalCount from API may include filtered E2E tickets.
-  // The visible tickets already exclude E2E (server-side filter).
-  // If totalCount <= PAGE_SIZE, all tickets fit on one page regardless of filtering.
-  // Only show "load more" when there clearly are more pages of data.
   return visible >= PAGE_SIZE || totalCount.value > PAGE_SIZE
 })
 const PAGE_SIZE = 50
@@ -142,37 +165,3 @@ function formatTime(t: string) {
 watch(stateFilter, fetchTickets)
 onMounted(() => { fetchTickets() })
 </script>
-
-<style scoped>
-.ticket-list-page { max-width: 800px; margin: 0 auto; padding: 0 16px 40px; min-height: 100vh; }
-.page-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; }
-.page-header h1 { font-size: 20px; }
-.header-actions { display: flex; gap: 8px; align-items: center; }
-.btn-text { background: none; border: none; color: #1a73e8; cursor: pointer; font-size: 14px; }
-.tab-bar { display: flex; gap: 8px; margin-bottom: 12px; }
-.tab { padding: 8px 20px; border: 1px solid #ddd; border-radius: 20px; background: white; cursor: pointer; font-size: 14px; }
-.tab.active { background: #1a73e8; color: white; border-color: #1a73e8; }
-.search-bar { margin-bottom: 8px; }
-.search-input { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; font-family: inherit; box-sizing: border-box; }
-.search-input:focus { border-color: #1a73e8; }
-.filter-row { margin-bottom: 8px; }
-.filter-e2e { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #666; cursor: pointer; }
-.user-info { padding: 8px 0; color: #666; font-size: 14px; }
-.ticket-list { display: flex; flex-direction: column; gap: 8px; padding-bottom: 20px; }
-.ticket-card { background: white; border-radius: 10px; padding: 14px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: box-shadow 0.2s; }
-.ticket-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
-.ticket-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.ticket-number { color: #1a73e8; font-weight: 600; font-size: 13px; }
-.state-badge { padding: 2px 8px; border-radius: 10px; font-size: 12px; }
-.state-badge.open { background: #e8f5e9; color: #2e7d32; }
-.state-badge.closed { background: #f5f5f5; color: #999; }
-.ticket-title { font-size: 15px; margin-bottom: 6px; line-height: 1.4; }
-.ticket-labels { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; }
-.ticket-label { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 11px; color: #fff; font-weight: 500; }
-.ticket-meta { display: flex; justify-content: space-between; font-size: 12px; color: #999; }
-.loading, .empty { text-align: center; padding: 40px; color: #999; }
-.load-more-wrap { text-align: center; padding: 20px; }
-.btn-outline { padding: 8px 32px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer; font-size: 14px; color: #666; }
-.btn-outline:hover { background: #f5f5f5; border-color: #bbb; }
-.btn-outline:disabled { opacity: 0.5; cursor: not-allowed; }
-</style>

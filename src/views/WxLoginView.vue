@@ -1,5 +1,5 @@
 <template>
-  <div class="loading-page">
+  <div class="flex items-center justify-center min-h-screen text-text-muted">
     <p>登录中...</p>
   </div>
 </template>
@@ -26,10 +26,3 @@ onMounted(async () => {
   router.push('/login')
 })
 </script>
-
-<style scoped>
-.loading-page {
-  display: flex; align-items: center; justify-content: center;
-  min-height: 100vh; color: #666;
-}
-</style>

@@ -1,42 +1,39 @@
 <template>
-  <div class="create-page">
-    <header class="page-header">
-      <button class="btn btn-text" @click="goBack">← 返回</button>
-      <h1>新建工单</h1>
-    </header>
+  <div class="max-w-2xl mx-auto px-4 pb-10 min-h-screen">
+    <button class="text-primary bg-transparent border-none cursor-pointer text-sm p-0 mb-3 inline-block hover:underline" @click="goBack">← 返回</button>
 
-    <div class="form-card">
-      <div class="form-group">
-        <label class="form-label">标题</label>
-        <input v-model="title" placeholder="请输入工单标题" class="form-input" maxlength="200" />
+    <div class="bg-surface rounded-xl shadow-sm p-5">
+      <div class="mb-4">
+        <label class="block text-sm font-semibold text-text mb-2">标题</label>
+        <input v-model="title" placeholder="请输入工单标题" class="w-full px-3.5 py-2.5 border border-border rounded-lg text-sm outline-none focus:border-primary font-sans" maxlength="200" />
       </div>
-      <div class="form-group">
-        <label class="form-label">关联项目</label>
-        <div v-if="projectStore.store.loading" class="text-muted">加载中...</div>
-        <div v-else class="project-checkboxes">
-          <label v-for="p in activeList" :key="p.id" class="checkbox-label">
+      <div class="mb-4">
+        <label class="block text-sm font-semibold text-text mb-2">关联项目</label>
+        <div v-if="projectStore.store.loading" class="text-text-muted text-xs">加载中...</div>
+        <div v-else class="flex gap-3 flex-wrap py-2">
+          <label v-for="p in activeList" :key="p.id" class="flex items-center gap-1 text-sm cursor-pointer">
             <input type="checkbox" :value="p.id" v-model="selectedProjectIds" />
             {{ p.name }}
           </label>
-          <div v-if="projectStore.store.list.length === 0" class="text-muted">暂无可选项目</div>
+          <div v-if="projectStore.store.list.length === 0" class="text-text-muted text-xs">暂无可选项目</div>
         </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">内容</label>
-        <div class="upload-area">
-          <button class="upload-btn" type="button" @click="triggerUpload">📎 上传图片</button>
+      <div class="mb-4">
+        <label class="block text-sm font-semibold text-text mb-2">内容</label>
+        <div class="mb-2">
+          <button class="inline-block px-3.5 py-1.5 bg-gray-100 rounded-lg text-xs cursor-pointer text-text-muted" type="button" @click="triggerUpload">📎 上传图片</button>
           <input ref="fileInputRef" type="file" accept="image/*" hidden @change="uploadImage" />
         </div>
-        <textarea v-model="body" rows="12" placeholder="请输入工单内容（支持 Markdown 格式）" class="form-textarea" @input="autoResize"></textarea>
-        <div v-if="uploading" class="uploading">上传中...</div>
+        <textarea v-model="body" rows="12" placeholder="请输入工单内容（支持 Markdown 格式）" class="w-full px-3 py-3 border border-border rounded-lg text-sm resize-y font-sans outline-none focus:border-primary" @input="autoResize"></textarea>
+        <div v-if="uploading" class="text-xs text-primary mt-1">上传中...</div>
       </div>
-      <div class="form-actions">
-        <button class="btn btn-secondary" @click="goBack">取消</button>
-        <button class="btn btn-primary" @click="submit" :disabled="!canSubmit || submitting">
+      <div class="flex justify-end gap-2 mt-5">
+        <button class="bg-gray-100 text-text-muted rounded-lg px-6 py-2.5 text-sm" @click="goBack">取消</button>
+        <button class="bg-primary text-white rounded-lg px-6 py-2.5 text-sm disabled:opacity-50 disabled:cursor-not-allowed" @click="submit" :disabled="!canSubmit || submitting">
           {{ submitting ? '提交中...' : '提交' }}
         </button>
       </div>
-      <p v-if="error" class="error-msg">{{ error }}</p>
+      <p v-if="error" class="text-danger mt-3 text-sm text-center">{{ error }}</p>
     </div>
   </div>
 </template>
@@ -129,29 +126,3 @@ onMounted(async () => {
   }
 })
 </script>
-
-<style scoped>
-.create-page { max-width: 800px; margin: 0 auto; padding: 0 16px 40px; min-height: 100vh; }
-.page-header { display: flex; align-items: center; gap: 12px; padding: 16px 0; }
-.page-header h1 { font-size: 20px; }
-.btn-text { background: none; border: none; color: #1a73e8; cursor: pointer; font-size: 14px; padding: 0; }
-.form-card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-.form-group { margin-bottom: 16px; }
-.form-label { display: block; font-size: 14px; font-weight: 600; color: #333; margin-bottom: 8px; }
-.form-input { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; outline: none; font-family: inherit; }
-.form-input:focus { border-color: #1a73e8; }
-.form-textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; resize: vertical; font-family: inherit; outline: none; }
-.form-textarea:focus { border-color: #1a73e8; }
-.project-checkboxes { display: flex; gap: 12px; flex-wrap: wrap; padding: 8px 0; }
-.checkbox-label { display: flex; align-items: center; gap: 4px; font-size: 14px; cursor: pointer; }
-.text-muted { color: #999; font-size: 13px; }
-.upload-area { margin-bottom: 8px; }
-.upload-btn { display: inline-block; padding: 6px 14px; background: #f0f0f0; border-radius: 6px; font-size: 13px; cursor: pointer; color: #666; }
-.uploading { font-size: 13px; color: #1a73e8; margin: 4px 0; }
-.form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
-.btn { padding: 10px 24px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; }
-.btn-primary { background: #1a73e8; color: white; }
-.btn-primary:disabled { background: #ccc; cursor: not-allowed; }
-.btn-secondary { background: #f0f0f0; color: #666; }
-.error-msg { color: #e74c3c; margin-top: 12px; font-size: 14px; text-align: center; }
-</style>
