@@ -333,14 +333,14 @@ onMounted(fetchDetail)
 .btn-primary { padding: 10px 24px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; background: #1a73e8; color: white; }
 .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
 .btn-text { background: none; border: none; color: #1a73e8; cursor: pointer; font-size: 14px; padding: 0; }
-:deep(.file-attachment-box) { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 8px; margin: 12px 0; }
-:deep(.file-attachment-box:hover) { background: #eee; }
+:deep(.file-attachment-box) { display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; margin: 16px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+:deep(.file-attachment-box:hover) { background: #fafafa; }
 :deep(.file-attachment-icon) { font-size: 28px; flex-shrink: 0; line-height: 1; }
 :deep(.file-attachment-info) { flex: 1; min-width: 0; }
-:deep(.file-attachment-name) { font-size: 13px; color: #333; font-weight: 600; word-break: break-all; line-height: 1.4; }
-:deep(.file-attachment-meta) { font-size: 11px; color: #999; margin-top: 2px; }
-:deep(.file-attachment-dl) { padding: 6px 16px; border-radius: 6px; font-size: 13px; background: #1a73e8; color: white; text-decoration: none; flex-shrink: 0; font-weight: 500; display: inline-block; }
-:deep(.file-attachment-dl:hover) { background: #1557b0; }
+:deep(.file-attachment-name) { font-size: 13px; font-weight: 600; word-break: break-all; line-height: 1.4; color: var(--color-text); }
+:deep(.file-attachment-meta) { font-size: 11px; color: var(--color-text-muted); margin-top: 2px; }
+:deep(.file-attachment-dl) { padding: 8px 20px; border-radius: 8px; font-size: 13px; background: var(--color-primary); color: white; text-decoration: none; flex-shrink: 0; font-weight: 500; display: inline-block; border: none; cursor: pointer; }
+:deep(.file-attachment-dl:hover) { background: var(--color-primary-dark); }
 .loading, .empty { text-align: center; padding: 40px; color: #999; }
 .uploading { font-size: 13px; color: #1a73e8; margin: 4px 0; }
 </style>
