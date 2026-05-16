@@ -26,6 +26,8 @@
           <label v-for="p in activeList" :key="p.id" class="flex items-center gap-1 text-sm cursor-pointer">
             <input type="checkbox" :value="p.id" v-model="selectedProjectIds" />
             {{ p.name }}
+            <span v-if="p.is_open_source" class="text-green-600 text-xs ml-1" title="开源">public</span>
+            <span v-else class="text-amber-600 text-xs ml-1" title="私有">private</span>
           </label>
           <div v-if="projectStore.store.list.length === 0" class="text-text-muted text-xs">暂无可选项目</div>
         </div>
