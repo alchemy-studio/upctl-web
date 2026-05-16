@@ -60,6 +60,15 @@ export interface TicketDetail {
   claude_prompt_prefix?: string
 }
 
+export interface DeployEnv {
+  id: string
+  name: string
+  domain?: string
+  description?: string
+  created_at: string
+  updated_at: string
+}
+
 export interface Project {
   id: string
   name: string

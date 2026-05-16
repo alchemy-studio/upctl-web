@@ -8,6 +8,18 @@
         <input v-model="title" placeholder="请输入工单标题" class="w-full px-3.5 py-2.5 border border-border rounded-lg text-sm outline-none focus:border-primary font-sans" maxlength="200" />
       </div>
       <div class="mb-4">
+        <label class="block text-sm font-semibold text-text mb-2">关联部署环境</label>
+        <div v-if="envStore.loading" class="text-text-muted text-xs">加载中...</div>
+        <div v-else class="flex gap-3 flex-wrap py-2">
+          <label v-for="e in envStore.list" :key="e.id" class="flex items-center gap-1 text-sm cursor-pointer">
+            <input type="checkbox" :value="e.id" v-model="selectedEnvIds" />
+            {{ e.name }}
+            <span v-if="e.domain" class="text-text-muted text-xs">({{ e.domain }})</span>
+          </label>
+          <div v-if="envStore.list.length === 0" class="text-text-muted text-xs">暂无可选部署环境</div>
+        </div>
+      </div>
+      <div class="mb-4">
         <label class="block text-sm font-semibold text-text mb-2">关联项目</label>
         <div v-if="projectStore.store.loading" class="text-text-muted text-xs">加载中...</div>
         <div v-else class="flex gap-3 flex-wrap py-2">
@@ -43,9 +55,11 @@ import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import request from '@/utils/request'
 import useProject from '@/store/project'
+import useDeployEnv from '@/store/deploy-env'
 
 const router = useRouter()
 const projectStore = useProject()
+const envStore = useDeployEnv()
 const activeList = projectStore.activeList
 
 const title = ref('')
@@ -54,6 +68,7 @@ const submitting = ref(false)
 const uploading = ref(false)
 const error = ref('')
 const selectedProjectIds = ref<string[]>([])
+const selectedEnvIds = ref<string[]>([])
 
 const canSubmit = computed(() => title.value.trim().length > 0)
 
@@ -62,9 +77,18 @@ async function submit() {
   error.value = ''
   submitting.value = true
 
-  // Append selected projects to body as markdown references (no memory_doc or repo_url)
-  // The backend build_ticket_context will assemble the full prompt text including memory_doc
+  // Append selected projects and deploy envs to body
   let finalBody = body.value.trim()
+  if (selectedEnvIds.value.length > 0) {
+    const selected = envStore.store.list.filter(e => selectedEnvIds.value.includes(e.id))
+    const envsMd = selected.map(e => {
+      let line = `- **${e.name}**`
+      if (e.domain) line += ` (${e.domain})`
+      if (e.description) line += `: ${e.description}`
+      return line
+    }).join('\n')
+    finalBody += `\n\n## 关联部署环境\n${envsMd}`
+  }
   if (selectedProjectIds.value.length > 0) {
     const selected = projectStore.store.list.filter(p => selectedProjectIds.value.includes(p.id))
     const projectsMd = selected.map(p => `- **${p.name}**`).join('\n')
@@ -121,7 +145,7 @@ function autoResize(e: Event) {
 }
 
 onMounted(async () => {
-  await projectStore.fetchAll()
+  await Promise.all([projectStore.fetchAll(), envStore.fetchAll()])
   console.debug('[CreateTicket] projects loaded:', projectStore.store.list.length, 'items')
   if (projectStore.store.list.length > 0) {
     console.debug('[CreateTicket] first project:', JSON.stringify({
