@@ -56,6 +56,7 @@
           </div>
           <textarea v-model="commentText" rows="6" placeholder="输入评论内容..." class="comment-input"></textarea>
           <div v-if="uploading" class="uploading">上传中...</div>
+          <div v-if="errorMsg" class="error-msg">{{ errorMsg }}</div>
           <div class="reply-actions">
             <button @click="sendComment" :disabled="sending" class="btn btn-primary">
               {{ sending ? '发送中...' : '发送' }}
@@ -85,6 +86,7 @@ const loading = ref(false)
 const commentText = ref('')
 const sending = ref(false)
 const uploading = ref(false)
+const errorMsg = ref('')
 const approving = ref(false)
 const pinning = ref(false)
 const unapproving = ref(false)
@@ -116,9 +118,19 @@ async function fetchDetail() {
   }
 }
 
+function showError(msg: string) {
+  errorMsg.value = msg
+  setTimeout(() => { errorMsg.value = '' }, 5000)
+}
+
 async function sendComment() {
   if (sending.value) return
+  if (!commentText.value.trim()) {
+    showError('评论内容不能为空')
+    return
+  }
   sending.value = true
+  errorMsg.value = ''
   const { r, e } = await request({
     url: `/api/v2/upctl/api/tickets/${ticketNumber}/comments`,
     method: 'POST',
@@ -131,11 +143,14 @@ async function sendComment() {
   if (r) {
     commentText.value = ''
     await fetchDetail()
+  } else {
+    showError(e || '发送失败，请重试')
   }
 }
 
 async function approveTicket() {
   approving.value = true
+  errorMsg.value = ''
   const { r, e } = await request({
     url: `/api/v2/upctl/api/tickets/${ticketNumber}`,
     method: 'PATCH',
@@ -143,10 +158,12 @@ async function approveTicket() {
   })
   approving.value = false
   if (r) await fetchDetail()
+  else showError(e || '批准失败')
 }
 
 async function unapproveTicket() {
   unapproving.value = true
+  errorMsg.value = ''
   const { r, e } = await request({
     url: `/api/v2/upctl/api/tickets/${ticketNumber}`,
     method: 'PATCH',
@@ -154,6 +171,7 @@ async function unapproveTicket() {
   })
   unapproving.value = false
   if (r) await fetchDetail()
+  else showError(e || '解除批准失败')
 }
 
 async function startProgress() {
@@ -198,6 +216,7 @@ async function startProgress() {
 async function closeTicket() {
   if (!confirm('确认关闭此工单？关闭后无法恢复。')) return
   closing.value = true
+  errorMsg.value = ''
   const { r, e } = await request({
     url: `/api/v2/upctl/api/tickets/${ticketNumber}`,
     method: 'PATCH',
@@ -205,6 +224,7 @@ async function closeTicket() {
   })
   closing.value = false
   if (r) await fetchDetail()
+  else showError(e || '关闭失败')
 }
 
 const fileInputRef = ref<HTMLInputElement | null>(null)
@@ -216,6 +236,7 @@ async function uploadImage(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (!file) return
   uploading.value = true
+  errorMsg.value = ''
   const { r, d, e: err } = await request({
     url: '/api/v2/upctl/api/upload_attachment',
     method: 'POST',
@@ -230,6 +251,8 @@ async function uploadImage(e: Event) {
     } else {
       commentText.value += `\n[${file.name}](${d.url})\n`
     }
+  } else {
+    showError(err || '上传失败')
   }
 }
 
@@ -343,4 +366,5 @@ onMounted(fetchDetail)
 :deep(.file-attachment-dl:hover) { background: var(--color-primary-dark); }
 .loading, .empty { text-align: center; padding: 40px; color: #999; }
 .uploading { font-size: 13px; color: #1a73e8; margin: 4px 0; }
+.error-msg { font-size: 13px; color: #c62828; margin: 6px 0; padding: 6px 10px; background: #fce4ec; border-radius: 6px; }
 </style>
