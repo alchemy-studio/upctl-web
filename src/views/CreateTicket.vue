@@ -9,14 +9,14 @@
       </div>
       <div class="mb-4">
         <label class="block text-sm font-semibold text-text mb-2">关联部署环境</label>
-        <div v-if="envStore.loading" class="text-text-muted text-xs">加载中...</div>
+        <div v-if="envStore.store.loading" class="text-text-muted text-xs">加载中...</div>
         <div v-else class="flex gap-3 flex-wrap py-2">
-          <label v-for="e in envStore.list" :key="e.id" class="flex items-center gap-1 text-sm cursor-pointer">
+          <label v-for="e in envStore.store.list" :key="e.id" class="flex items-center gap-1 text-sm cursor-pointer">
             <input type="checkbox" :value="e.id" v-model="selectedEnvIds" />
             {{ e.name }}
             <span v-if="e.domain" class="text-text-muted text-xs">({{ e.domain }})</span>
           </label>
-          <div v-if="envStore.list.length === 0" class="text-text-muted text-xs">暂无可选部署环境</div>
+          <div v-if="envStore.store.list.length === 0" class="text-text-muted text-xs">暂无可选部署环境</div>
         </div>
       </div>
       <div class="mb-4">
