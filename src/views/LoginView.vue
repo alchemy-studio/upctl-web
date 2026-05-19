@@ -8,15 +8,31 @@
       <p class="text-text-muted mb-6">请使用微信扫码登录</p>
       <div v-if="showWxQr" id="login-qr" class="flex justify-center my-5"></div>
       <div v-else class="flex flex-col gap-3">
-        <p class="text-gray-400 text-sm">开发模式：请输入 union_id</p>
+        <p class="text-gray-400 text-sm">开发模式：请输入 union_id 或用户名密码</p>
         <input
           v-model="unionid"
           placeholder="union_id"
           class="px-4 py-2.5 border border-border rounded-lg text-sm"
         />
+        <div class="flex items-center gap-3 text-xs text-gray-300">
+          <span class="flex-1 border-t border-gray-200"></span>
+          <span>或</span>
+          <span class="flex-1 border-t border-gray-200"></span>
+        </div>
+        <input
+          v-model="username"
+          placeholder="用户名"
+          class="px-4 py-2.5 border border-border rounded-lg text-sm"
+        />
+        <input
+          v-model="password"
+          type="password"
+          placeholder="密码"
+          class="px-4 py-2.5 border border-border rounded-lg text-sm"
+        />
         <button
           @click="submit"
-          :disabled="!unionid.trim()"
+          :disabled="!canLogin"
           class="px-6 py-2.5 rounded-lg text-sm cursor-pointer bg-primary text-white disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
           登录
@@ -32,16 +48,20 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import useUser from '@/store/user'
 
-const { store, wx_login, login, logout } = useUser()
+const { store, wx_login, login, loginWithPassword, logout } = useUser()
 const router = useRouter()
 const unionid = ref('')
+const username = ref('')
+const password = ref('')
 const error = ref('')
 const showWxQr = ref(false)
 const hasToken = ref(!!window.localStorage.getItem('Authorization'))
+
+const canLogin = computed(() => unionid.value.trim() || (username.value.trim() && password.value.trim()))
 
 onMounted(() => {
   if (WX_APP) {
@@ -69,11 +89,13 @@ function initWxQr() {
 
 async function submit() {
   error.value = ''
-  const ok = await login(unionid.value)
+  const ok = unionid.value.trim()
+    ? await login(unionid.value.trim())
+    : await loginWithPassword(username.value, password.value)
   if (ok) {
     router.push('/')
   } else {
-    error.value = '登录失败'
+    error.value = '登录失败，请检查用户名和密码'
   }
 }
 </script>

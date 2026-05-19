@@ -48,6 +48,21 @@ export default function useUser() {
     return false
   }
 
+  async function loginWithPassword(username: string, password: string) {
+    store.loading = true
+    const { r, d } = await request({
+      url: '/api/v1/uc/login_with_password',
+      method: 'POST',
+      data: { username, password },
+    })
+    store.loading = false
+    if (r && d) {
+      saveToken(d)
+      return await read()
+    }
+    return false
+  }
+
   async function sudo() {
     store.loading = true
     const { r, d, e } = await request({
@@ -90,5 +105,5 @@ export default function useUser() {
     window.location.href = '/login'
   }
 
-  return { store, wx_login, login, sudo, read, checkRole, logout }
+  return { store, wx_login, login, loginWithPassword, sudo, read, checkRole, logout }
 }
