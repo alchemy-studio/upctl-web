@@ -26,5 +26,5 @@ export default function useDeployEnv() {
     }
   }
 
-  return { store, fetchAll }
+  return { ...store, store, fetchAll }
 }
