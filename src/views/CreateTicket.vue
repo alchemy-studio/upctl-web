@@ -119,6 +119,7 @@ async function uploadImage(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (!file) return
   uploading.value = true
+  error.value = ''
   const { r, d, e: err } = await request({
     url: '/api/v2/upctl/api/upload_attachment',
     method: 'POST',
@@ -133,6 +134,8 @@ async function uploadImage(e: Event) {
     } else {
       body.value += `\n[${file.name}](${d.url})\n`
     }
+  } else {
+    error.value = err || '上传失败'
   }
 }
 
