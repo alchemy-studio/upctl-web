@@ -28,7 +28,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import useUser from '@/store/user'
 
-console.debug('[upctl-web] deploy_ver=20260516.001')
+console.debug('[upctl-web] deploy_ver=20260529.001')
 
 const initializing = ref(true)
 const route = useRoute()
