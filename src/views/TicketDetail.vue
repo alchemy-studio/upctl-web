@@ -74,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import request from '@/utils/request'
 import type { Ticket, TicketComment, TicketDetail } from '@/types'
@@ -278,16 +278,24 @@ function renderCommentBody(body: string) {
 
 function renderMarkdown(text: string): string {
   if (!text) return ''
-  let html = text
+  // Extract and protect mermaid code blocks before any escaping
+  const mermaidBlocks: string[] = []
+  let processed = text.replace(/```mermaid\n?([\s\S]*?)```/g, (_m: string, code: string) => {
+    const idx = mermaidBlocks.length
+    mermaidBlocks.push(code.trim())
+    return `<!--MERMAID_BLOCK_${idx}-->`
+  })
+
+  let html = processed
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
   // images
   html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="md-img" />')
-  // file attachments (uploaded via /api/v2/upctl/api/attachment/...)
+  // file attachments
   html = html.replace(
     /\[([^\]]*)\]\(\/api\/v2\/upctl\/api\/attachment\/([^)]+)\)/g,
-    (match: string, text: string, fullUrl: string) => {
+    (_m: string, text: string, fullUrl: string) => {
       const rawName = fullUrl.split('?')[0]
       const ext = rawName.split('.').pop()?.toLowerCase() || ''
       const imgExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp']
@@ -300,14 +308,43 @@ function renderMarkdown(text: string): string {
       return `<div class="file-attachment-box"><div class="file-attachment-icon">${icon}</div><div class="file-attachment-info"><div class="file-attachment-name">${displayName}</div><div class="file-attachment-meta">${ext.toUpperCase()} 文件</div></div><a href="/api/v2/upctl/api/attachment/${fullUrl}" target="_blank" class="file-attachment-dl">${ext === 'pdf' ? '预览' : '下载'}</a></div>`
     }
   )
-  // regular links (non-attachment)
+  // regular links
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+  // restore mermaid blocks
+  html = html.replace(/<!--MERMAID_BLOCK_(\d+)-->/g, (_m: string, idx: string) => {
+    const code = mermaidBlocks[parseInt(idx)]
+    if (!code) return ''
+    return `<div class="mermaid">${code}</div>`
+  })
   // line breaks
   html = html.replace(/\n/g, '<br/>')
   // bold
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
   return html
 }
+
+// Render mermaid diagrams after DOM update
+async function renderMermaidDiagrams() {
+  await nextTick()
+  const els = document.querySelectorAll('.mermaid')
+  if (els.length === 0) return
+  try {
+    const mermaid = await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')
+    mermaid.default.initialize({
+      startOnLoad: false,
+      theme: 'default',
+      securityLevel: 'loose',
+    })
+    await mermaid.default.run({ querySelector: '.mermaid' })
+  } catch (e) {
+    console.warn('[mermaid] render error:', e)
+  }
+}
+
+// Watch for ticket data changes to re-render mermaid
+import { watch } from 'vue'
+watch(ticket, () => { renderMermaidDiagrams() })
+watch(comments, () => { renderMermaidDiagrams() })
 
 function formatTime(t: string) {
   return t ? dayjs(t).format('MM-DD HH:mm') : ''
@@ -376,6 +413,8 @@ onMounted(fetchDetail)
 :deep(.file-attachment-meta) { font-size: 11px; color: var(--color-text-muted); margin-top: 2px; }
 :deep(.file-attachment-dl) { padding: 8px 20px; border-radius: 8px; font-size: 13px; background: var(--color-primary); color: white; text-decoration: none; flex-shrink: 0; font-weight: 500; display: inline-block; border: none; cursor: pointer; }
 :deep(.file-attachment-dl:hover) { background: var(--color-primary-dark); }
+.mermaid { margin: 16px 0; padding: 12px; background: #f8f9fa; border-radius: 8px; overflow-x: auto; }
+.mermaid svg { max-width: 100%; height: auto; }
 .loading, .empty { text-align: center; padding: 40px; color: #999; }
 .uploading { font-size: 13px; color: #1a73e8; margin: 4px 0; }
 .error-msg { font-size: 13px; color: #c62828; margin: 6px 0; padding: 6px 10px; background: #fce4ec; border-radius: 6px; }
