@@ -316,6 +316,16 @@ function renderMarkdown(text: string): string {
     if (!code) return ''
     return `<div class="mermaid">${code.replace(/\n/g, '&#10;')}</div>`
   })
+  // headings
+  html = html.replace(/^### (.+)$/gm, '<h4>$1</h4>')
+  html = html.replace(/^## (.+)$/gm, '<h3>$1</h3>')
+  html = html.replace(/^# (.+)$/gm, '<h2>$1</h2>')
+  // unordered lists
+  html = html.replace(/^- (.+)$/gm, '<li>$1</li>')
+  // blockquotes
+  html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>')
+  // inline code
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>')
   // line breaks (outside mermaid divs)
   html = html.replace(/\n/g, '<br/>')
   // bold
