@@ -158,5 +158,23 @@ onMounted(async () => {
       name: projectStore.store.list[0].name,
     }))
   }
+  // Check for ref query param — pre-fill body with parent ticket reference
+  const params = new URLSearchParams(window.location.search)
+  const ref = params.get('ref')
+  if (ref) {
+    const refNum = parseInt(ref, 10)
+    if (!isNaN(refNum)) {
+      body.value = `## 追问自 #${refNum}\n\n`
+      // Fetch parent ticket title to display
+      try {
+        const { r, d } = await request({
+          url: `/api/v2/upctl/api/tickets/${refNum}`,
+        })
+        if (r && d?.issue?.title) {
+          body.value += `> 原工单 #${refNum}: ${d.issue.title}\n\n`
+        }
+      } catch { /* ignore */ }
+    }
+  }
 })
 </script>

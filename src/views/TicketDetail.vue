@@ -44,6 +44,7 @@
           <button v-if="hasLabel('approved') && !hasLabel('in_progress')" class="btn btn-unapprove" @click="unapproveTicket" :disabled="unapproving">
             {{ unapproving ? '取消中...' : '↩ 解除批准' }}
           </button>
+          <button class="btn btn-followup" @click="followUp">💬 追问</button>
           <button class="btn btn-close" @click="closeTicket" :disabled="closing">
             {{ closing ? '关闭中...' : '✕ 关闭工单' }}
           </button>
@@ -309,6 +310,10 @@ function formatTime(t: string) {
   return t ? dayjs(t).format('MM-DD HH:mm') : ''
 }
 
+function followUp() {
+  router.push(`/create?ref=${ticketNumber}`)
+}
+
 function goBack() {
   router.push('/')
 }
@@ -346,6 +351,7 @@ onMounted(fetchDetail)
 .btn-pin:disabled { background: #ffcc80; cursor: not-allowed; }
 .btn-unapprove { padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; background: #f9a825; color: white; }
 .btn-unapprove:disabled { background: #fff9c4; cursor: not-allowed; }
+.btn-followup { padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; background: #1565c0; color: white; }
 .btn-close { padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; background: #c62828; color: white; }
 .btn-close:disabled { background: #ef9a9a; cursor: not-allowed; }
 .lock-hint { text-align: center; color: #999; font-size: 13px; margin-top: 8px; }
