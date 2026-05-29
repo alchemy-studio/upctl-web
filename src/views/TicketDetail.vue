@@ -16,6 +16,10 @@
           <span>{{ formatTime(ticket.created_at) }}</span>
         </div>
         <div class="ticket-body" v-html="renderedBody"></div>
+        <div class="followup-bar">
+          <button class="btn-followup" @click="followUp">💬 追问</button>
+          <span class="followup-hint">对当前工单提出追问，创建关联的新工单</span>
+        </div>
         <div v-if="ticket.labels && ticket.labels.length" class="labels">
           <span v-for="l in ticket.labels" :key="l.id" class="label" :style="{ background: '#' + l.color + '22', color: '#' + l.color }">{{ l.name }}</span>
         </div>
@@ -44,7 +48,6 @@
           <button v-if="hasLabel('approved') && !hasLabel('in_progress')" class="btn btn-unapprove" @click="unapproveTicket" :disabled="unapproving">
             {{ unapproving ? '取消中...' : '↩ 解除批准' }}
           </button>
-          <button class="btn btn-followup" @click="followUp">💬 追问</button>
           <button class="btn btn-close" @click="closeTicket" :disabled="closing">
             {{ closing ? '关闭中...' : '✕ 关闭工单' }}
           </button>
@@ -351,7 +354,10 @@ onMounted(fetchDetail)
 .btn-pin:disabled { background: #ffcc80; cursor: not-allowed; }
 .btn-unapprove { padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; background: #f9a825; color: white; }
 .btn-unapprove:disabled { background: #fff9c4; cursor: not-allowed; }
+.followup-bar { margin-top: 12px; display: flex; align-items: center; gap: 8px; }
+.followup-hint { font-size: 12px; color: #999; }
 .btn-followup { padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; background: #1565c0; color: white; }
+.btn-followup:hover { background: #0d47a1; }
 .btn-close { padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; background: #c62828; color: white; }
 .btn-close:disabled { background: #ef9a9a; cursor: not-allowed; }
 .lock-hint { text-align: center; color: #999; font-size: 13px; margin-top: 8px; }
