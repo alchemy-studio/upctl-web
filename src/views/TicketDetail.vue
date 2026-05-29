@@ -25,6 +25,21 @@
         </div>
       </div>
 
+      <div v-if="ticket.state === 'open' && canManage" class="actions-bar">
+        <button v-if="!hasLabel('approved')" class="btn btn-approve" @click="approveTicket" :disabled="approving">
+          {{ approving ? '批准中...' : '✓ 批准工单' }}
+        </button>
+        <button v-if="!hasLabel('in_progress')" class="btn btn-pin" @click="startProgress" :disabled="pinning">
+          {{ pinning ? '处理中...' : '📌 开始处理' }}
+        </button>
+        <button v-if="hasLabel('approved') && !hasLabel('in_progress')" class="btn btn-unapprove" @click="unapproveTicket" :disabled="unapproving">
+          {{ unapproving ? '取消中...' : '↩ 解除批准' }}
+        </button>
+        <button class="btn btn-close" @click="closeTicket" :disabled="closing">
+          {{ closing ? '关闭中...' : '✕ 关闭工单' }}
+        </button>
+      </div>
+
       <div class="comments-section">
         <h3>评论 ({{ comments.length }})</h3>
         <div v-if="comments.length === 0" class="empty">暂无评论</div>
@@ -38,20 +53,6 @@
       </div>
 
       <div v-if="ticket.state === 'open'" class="reply-section">
-        <div class="reply-actions-bar" v-if="canManage">
-          <button v-if="!hasLabel('approved')" class="btn btn-approve" @click="approveTicket" :disabled="approving">
-            {{ approving ? '批准中...' : '✓ 批准工单' }}
-          </button>
-          <button v-if="!hasLabel('in_progress')" class="btn btn-pin" @click="startProgress" :disabled="pinning">
-            {{ pinning ? '处理中...' : '📌 开始处理' }}
-          </button>
-          <button v-if="hasLabel('approved') && !hasLabel('in_progress')" class="btn btn-unapprove" @click="unapproveTicket" :disabled="unapproving">
-            {{ unapproving ? '取消中...' : '↩ 解除批准' }}
-          </button>
-          <button class="btn btn-close" @click="closeTicket" :disabled="closing">
-            {{ closing ? '关闭中...' : '✕ 关闭工单' }}
-          </button>
-        </div>
         <div v-if="!isLocked">
           <h3>添加评论</h3>
           <div class="upload-area">
@@ -405,6 +406,7 @@ onMounted(fetchDetail)
 .followup-hint { font-size: 12px; color: #999; }
 .btn-followup { padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; background: #1565c0; color: white; }
 .btn-followup:hover { background: #0d47a1; }
+.actions-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
 .btn-close { padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; background: #c62828; color: white; }
 .btn-close:disabled { background: #ef9a9a; cursor: not-allowed; }
 .lock-hint { text-align: center; color: #999; font-size: 13px; margin-top: 8px; }
