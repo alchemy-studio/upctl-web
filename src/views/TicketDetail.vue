@@ -314,7 +314,7 @@ function formatTime(t: string) {
 }
 
 function followUp() {
-  router.push(`/create?ref=${ticketNumber}`)
+  router.push(`/tickets/new?ref=${ticketNumber}`)
 }
 
 function goBack() {
