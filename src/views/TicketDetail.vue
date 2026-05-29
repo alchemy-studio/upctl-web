@@ -278,12 +278,12 @@ function renderCommentBody(body: string) {
 
 function renderMarkdown(text: string): string {
   if (!text) return ''
-  // Extract and protect mermaid code blocks before any escaping
+  // Extract and protect mermaid code blocks
   const mermaidBlocks: string[] = []
   let processed = text.replace(/```mermaid\n?([\s\S]*?)```/g, (_m: string, code: string) => {
     const idx = mermaidBlocks.length
     mermaidBlocks.push(code.trim())
-    return `<!--MERMAID_BLOCK_${idx}-->`
+    return `\x00MERMAID_BLOCK_${idx}\x00`
   })
 
   let html = processed
@@ -311,7 +311,7 @@ function renderMarkdown(text: string): string {
   // regular links
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
   // restore mermaid blocks (with protected newlines)
-  html = html.replace(/<!--MERMAID_BLOCK_(\d+)-->/g, (_m: string, idx: string) => {
+  html = html.replace(/\x00MERMAID_BLOCK_(\d+)\x00/g, (_m: string, idx: string) => {
     const code = mermaidBlocks[parseInt(idx)]
     if (!code) return ''
     return `<div class="mermaid">${code.replace(/\n/g, '&#10;')}</div>`
