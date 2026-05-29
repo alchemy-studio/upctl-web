@@ -164,13 +164,15 @@ onMounted(async () => {
   if (ref) {
     const refNum = parseInt(ref, 10)
     if (!isNaN(refNum)) {
+      title.value = `追问 #${refNum}: `
       body.value = `## 追问自 #${refNum}\n\n`
-      // Fetch parent ticket title to display
+      // Fetch parent ticket to get title
       try {
         const { r, d } = await request({
           url: `/api/v2/upctl/api/tickets/${refNum}`,
         })
         if (r && d?.issue?.title) {
+          title.value += d.issue.title
           body.value += `> 原工单 #${refNum}: ${d.issue.title}\n\n`
         }
       } catch { /* ignore */ }
