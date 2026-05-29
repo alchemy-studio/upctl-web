@@ -310,13 +310,13 @@ function renderMarkdown(text: string): string {
   )
   // regular links
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
-  // restore mermaid blocks
+  // restore mermaid blocks (with protected newlines)
   html = html.replace(/<!--MERMAID_BLOCK_(\d+)-->/g, (_m: string, idx: string) => {
     const code = mermaidBlocks[parseInt(idx)]
     if (!code) return ''
-    return `<div class="mermaid">${code}</div>`
+    return `<div class="mermaid">${code.replace(/\n/g, '&#10;')}</div>`
   })
-  // line breaks
+  // line breaks (outside mermaid divs)
   html = html.replace(/\n/g, '<br/>')
   // bold
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
