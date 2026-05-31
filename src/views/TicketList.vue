@@ -70,7 +70,7 @@
           >{{ l.name }}</span>
         </div>
         <div class="flex justify-between text-xs text-text-muted">
-          <span>{{ t.user?.login || 'unknown' }}</span>
+          <span>{{ t.user?.full_name || t.user?.login || 'unknown' }}</span>
           <span>{{ formatTime(t.created_at) }}</span>
         </div>
       </div>

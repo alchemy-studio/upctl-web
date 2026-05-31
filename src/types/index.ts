@@ -36,8 +36,8 @@ export interface Ticket {
   labels: TicketLabel[]
   created_at: string
   updated_at: string
-  user?: { login: string }
-  assignee?: { login: string }
+  user?: { login: string; full_name?: string }
+  assignee?: { login: string; full_name?: string }
 }
 
 export interface TicketLabel {
@@ -49,7 +49,7 @@ export interface TicketLabel {
 export interface TicketComment {
   id: number
   body: string
-  user: { login: string }
+  user: { login: string; full_name?: string }
   created_at: string
   updated_at: string
 }

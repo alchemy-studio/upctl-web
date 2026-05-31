@@ -12,7 +12,7 @@
         <h2 class="ticket-title">{{ ticket.title }}</h2>
         <div class="ticket-meta">
           <span>状态: <strong :class="ticket.state">{{ ticket.state === 'open' ? '待处理' : '已关闭' }}</strong></span>
-          <span>创建者: {{ ticket.user?.login }}</span>
+          <span>创建者: {{ displayName(ticket.user) }}</span>
           <span>{{ formatTime(ticket.created_at) }}</span>
         </div>
         <div class="ticket-body" v-html="renderedBody"></div>
@@ -261,6 +261,10 @@ async function uploadImage(e: Event) {
   }
 }
 
+function displayName(user: { login: string; full_name?: string } | undefined | null): string {
+  return user?.full_name || user?.login || 'unknown'
+}
+
 function commentAuthor(c: TicketComment): string {
   const body = c.body || ''
   // Check if body starts with "> Name" (submitter_name prefix from backend)
@@ -268,7 +272,7 @@ function commentAuthor(c: TicketComment): string {
   if (match) {
     return match[1].trim()
   }
-  return c.user?.login || 'unknown'
+  return displayName(c.user)
 }
 
 function renderCommentBody(body: string) {
