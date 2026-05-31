@@ -32,6 +32,9 @@
         <button v-if="!hasLabel('in_progress')" class="btn btn-pin" @click="startProgress" :disabled="pinning">
           {{ pinning ? '处理中...' : '📌 开始处理' }}
         </button>
+        <button v-if="hasLabel('in_progress')" class="btn btn-emergency" @click="emergencyStop" :disabled="emergencyStopping">
+          {{ emergencyStopping ? '发送中...' : '🛑 急停' }}
+        </button>
         <button v-if="hasLabel('approved') && !hasLabel('in_progress')" class="btn btn-unapprove" @click="unapproveTicket" :disabled="unapproving">
           {{ unapproving ? '取消中...' : '↩ 解除批准' }}
         </button>
@@ -96,6 +99,7 @@ const approving = ref(false)
 const pinning = ref(false)
 const unapproving = ref(false)
 const closing = ref(false)
+const emergencyStopping = ref(false)
 
 const canManage = computed(() => checkRole('ADMIN') || checkRole('TESTER'))
 
@@ -230,6 +234,22 @@ async function closeTicket() {
   closing.value = false
   if (r) await fetchDetail()
   else showError(e || '关闭失败')
+}
+
+async function emergencyStop() {
+  if (!confirm('确认急停？将向 agent 发送两次 ESC 信号以中断当前工作。')) return
+  emergencyStopping.value = true
+  errorMsg.value = ''
+  const { r, e } = await request({
+    url: `/api/v2/upctl/api/tickets/${ticketNumber}/emergency-stop`,
+    method: 'POST',
+  })
+  emergencyStopping.value = false
+  if (r) {
+    await fetchDetail()
+  } else {
+    showError(e || '急停失败')
+  }
 }
 
 const fileInputRef = ref<HTMLInputElement | null>(null)
@@ -411,6 +431,9 @@ onMounted(fetchDetail)
 .btn-followup { padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; background: #1565c0; color: white; }
 .btn-followup:hover { background: #0d47a1; }
 .actions-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.btn-emergency { padding: 8px 16px; border: 2px solid #d32f2f; border-radius: 6px; font-size: 13px; cursor: pointer; background: #fff; color: #d32f2f; font-weight: bold; }
+.btn-emergency:hover { background: #ffebee; }
+.btn-emergency:disabled { border-color: #ef9a9a; color: #ef9a9a; cursor: not-allowed; background: #fff; }
 .btn-close { padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; background: #c62828; color: white; }
 .btn-close:disabled { background: #ef9a9a; cursor: not-allowed; }
 .lock-hint { text-align: center; color: #999; font-size: 13px; margin-top: 8px; }
