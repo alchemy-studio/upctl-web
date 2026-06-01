@@ -4,3 +4,5 @@ dist/
 .env*
 public/favicon.ico
 public/icon-192.png
+.env.production
+!.env.example
