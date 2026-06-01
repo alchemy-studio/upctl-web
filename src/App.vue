@@ -27,8 +27,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import useUser from '@/store/user'
+import { getToken } from '@/utils/index'
 
-console.debug('[upctl-web] deploy_ver=20260529.002')
+console.debug('[upctl-web] deploy_ver=20260531.001')
 
 const initializing = ref(true)
 const route = useRoute()
@@ -47,10 +48,27 @@ function handleLogout() {
 }
 
 onMounted(async () => {
-  const token = window.localStorage.getItem('Authorization')
-  if (token) {
-    await read()
+  await router.isReady()
+
+  // 登录页勿用旧 token 调 read，避免与 wx_login 竞态、401 清掉新 token
+  if (isLoginRoute.value) {
+    initializing.value = false
+    return
   }
+
+  const token = getToken()
+  if (!token) {
+    initializing.value = false
+    return
+  }
+
+  const ok = await read()
+  if (!ok || !store.currentUser?.hty_id) {
+    logout()
+    initializing.value = false
+    return
+  }
+
   initializing.value = false
 })
 </script>
