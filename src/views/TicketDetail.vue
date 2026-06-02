@@ -184,7 +184,11 @@ async function unapproveTicket() {
 }
 
 async function startProgress() {
+  // Guard: prevent concurrent calls (in addition to UI disabled state)
+  if (pinning.value) return
   pinning.value = true
+  errorMsg.value = ''
+
   // Start processing implies approval: add approved + in_progress labels
   const { r, e } = await request({
     url: `/api/v2/upctl/api/tickets/${ticketNumber}`,
@@ -193,9 +197,11 @@ async function startProgress() {
   })
   if (!r) {
     pinning.value = false
+    showError(e || '标记处理中失败')
     return
   }
   await fetchDetail()
+
   // Then trigger the agent to start working on this ticket
   // The backend builds ticket context + memory instruction + prompt prefix
   const prompt = '## 当前工单\n开始处理此工单。'

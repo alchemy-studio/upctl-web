@@ -29,7 +29,7 @@ import { useRoute, useRouter } from 'vue-router'
 import useUser from '@/store/user'
 import { getToken } from '@/utils/index'
 
-console.debug('[upctl-web] deploy_ver=20260531.001')
+console.debug('[upctl-web] deploy_ver=20260602.001')
 
 const initializing = ref(true)
 const route = useRoute()
